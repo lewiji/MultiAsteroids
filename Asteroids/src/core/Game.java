@@ -67,6 +67,7 @@ public class Game extends BasicGame {
 					|| bullet.getY() > container.getHeight() 
 					|| bullet.getY() < 0 ) {
 				iterator.remove();
+				Entity.entities.remove(bullet);
 			}
 		}
 		
