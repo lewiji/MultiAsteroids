@@ -1,10 +1,10 @@
-package core;
+package entities;
 
 import org.newdawn.slick.geom.Polygon;
 import org.newdawn.slick.geom.Transform;
 import org.newdawn.slick.geom.Vector2f;
 
-public class Ship extends Entity {
+public class Ship implements Entity {
 	private Polygon ship = null;
 	private Vector2f thrust = new Vector2f();
 	private float rotation = 0.0f;
@@ -12,11 +12,16 @@ public class Ship extends Entity {
 	private float maxThrust = 0.4f;
 	private float acceleration = 0.02f;
 	
+	private static int playerCount = 0;
+	private int playerId;
+	
 	public Ship() {
 		ship = new Polygon();
 		ship.addPoint(0.0f, 0.0f);
 		ship.addPoint(20.0f, 0.0f);
 		ship.addPoint(10.0f, 20.0f);
+		playerId = playerCount;
+		playerCount++;
 	}
 	
 	private void pointAtMouse(float mouseX, float mouseY) {
@@ -86,5 +91,9 @@ public class Ship extends Entity {
 	@Override
 	public void goneOffScreen() {
 		
+	}
+
+	public int getPlayerId() {
+		return playerId;
 	}
 }

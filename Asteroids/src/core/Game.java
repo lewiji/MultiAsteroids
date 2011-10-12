@@ -3,9 +3,7 @@
  */
 package core;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.BasicGame;
@@ -15,14 +13,17 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.geom.Shape;
 
+import entities.Bullet;
+import entities.BulletFactory;
+import entities.Ship;
+import entities.ShipFactory;
+
 /**
  * @author a8011484
  *
  */
 public class Game extends BasicGame {
-	Ship ship = new Ship();
-	List<Bullet> bullets = new ArrayList<Bullet>();
-
+	Ship playerShip;
 	public Game() {
 		super("Asteroids");
 	}
@@ -31,34 +32,34 @@ public class Game extends BasicGame {
 	public void render(GameContainer container, Graphics g)
 			throws SlickException {
 		
-		for (Entity entity : Entity.entities) {
-			g.draw((Shape) entity.getDrawable());
+		for (Ship ship : ShipFactory.ships) {
+			g.draw((Shape) ship.getDrawable());
+		}
+		
+		for (Bullet bullet : BulletFactory.bullets) {
+			g.draw((Shape) bullet.getDrawable());
 		}
 	}
 
 	@Override
 	public void init(GameContainer container) throws SlickException {
-		
+		playerShip = new Ship();
+		ShipFactory.addShip(playerShip);
 	}
 
 	@Override
 	public void update(GameContainer container, int delta)
 			throws SlickException {
 		Input input = container.getInput();
+		
+		updatePlayerShip(container, delta, input);		
+		updateBullets(container, delta);
+	}
 
-		ship.update(input.getMouseX(), input.getMouseY(), delta);
-		
-		if (input.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON)) {
-			ship.thrust();
-		}
-		
-		if (input.isMousePressed(Input.MOUSE_RIGHT_BUTTON)) {
-			bullets.add(new Bullet(ship.getAngle(), ship.getX(), ship.getY()));
-		}
-		
-		Iterator<Bullet> iterator = bullets.iterator();
-		while (iterator.hasNext()) {
-			Bullet bullet = iterator.next();
+	private void updateBullets(GameContainer container, int delta) {
+		Iterator<Bullet> bulletIterator = BulletFactory.bullets.iterator();
+		while (bulletIterator.hasNext()) {
+			Bullet bullet = bulletIterator.next();
 			
 			bullet.update(delta);	
 			
@@ -66,28 +67,40 @@ public class Game extends BasicGame {
 					|| bullet.getX() < 0 
 					|| bullet.getY() > container.getHeight() 
 					|| bullet.getY() < 0 ) {
-				iterator.remove();
-				Entity.entities.remove(bullet);
+				bulletIterator.remove();
+				BulletFactory.removeBullet(bullet);
 				bullet = null;
 			}
 		}
-		
-		if (ship.getX() > container.getWidth()) {
-			ship.setX(0);
-		}
-		
-		if (ship.getX() < 0) {
-			ship.setX(container.getWidth());
-		}
-		
-		if (ship.getY() > container.getHeight()) {
-			ship.setY(0);
-		}
-		
-		if (ship.getY() < 0) {
-			ship.setY(container.getHeight());
-		}
+	}
 
+	private void updatePlayerShip(GameContainer container, int delta,
+			Input input) {
+		playerShip.update(input.getMouseX(), input.getMouseY(), delta);
+		
+		if (input.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON)) {
+			playerShip.thrust();
+		}
+		
+		if (input.isMousePressed(Input.MOUSE_RIGHT_BUTTON)) {
+			BulletFactory.addBullet(new Bullet(playerShip.getAngle(), playerShip.getX(), playerShip.getY(), playerShip.getPlayerId()));
+		}
+		
+		if (playerShip.getX() > container.getWidth()) {
+			playerShip.setX(0);
+		}
+		
+		if (playerShip.getX() < 0) {
+			playerShip.setX(container.getWidth());
+		}
+		
+		if (playerShip.getY() > container.getHeight()) {
+			playerShip.setY(0);
+		}
+		
+		if (playerShip.getY() < 0) {
+			playerShip.setY(container.getHeight());
+		}
 	}
 
 
