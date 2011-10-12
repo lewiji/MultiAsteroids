@@ -3,7 +3,10 @@
  */
 package core;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.BasicGame;
@@ -13,8 +16,11 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.geom.Shape;
 
+import entities.Asteroid;
+import entities.AsteroidFactory;
 import entities.Bullet;
 import entities.BulletFactory;
+import entities.Entity;
 import entities.Ship;
 import entities.ShipFactory;
 
@@ -24,6 +30,7 @@ import entities.ShipFactory;
  */
 public class Game extends BasicGame {
 	Ship playerShip;
+	
 	public Game() {
 		super("Asteroids");
 	}
@@ -32,12 +39,22 @@ public class Game extends BasicGame {
 	public void render(GameContainer container, Graphics g)
 			throws SlickException {
 		
-		for (Ship ship : ShipFactory.ships) {
+		Iterator<Ship> shipIterator = ShipFactory.ships.iterator();
+		while (shipIterator.hasNext()) {
+			Ship ship = shipIterator.next();
 			g.draw((Shape) ship.getDrawable());
 		}
 		
-		for (Bullet bullet : BulletFactory.bullets) {
+		Iterator<Bullet> bulletIterator = BulletFactory.bullets.iterator();
+		while (bulletIterator.hasNext()) {
+			Bullet bullet = bulletIterator.next();
 			g.draw((Shape) bullet.getDrawable());
+		}
+		
+		Iterator<Asteroid> asteroidIterator = AsteroidFactory.asteroids.iterator();
+		while (asteroidIterator.hasNext()) {
+			Asteroid asteroid = asteroidIterator.next();
+			g.draw((Shape) asteroid.getDrawable());
 		}
 	}
 
@@ -45,6 +62,11 @@ public class Game extends BasicGame {
 	public void init(GameContainer container) throws SlickException {
 		playerShip = new Ship();
 		ShipFactory.addShip(playerShip);
+		AsteroidFactory.addAsteroid(new Asteroid());
+
+		AsteroidFactory.addAsteroid(new Asteroid());
+
+		AsteroidFactory.addAsteroid(new Asteroid());
 	}
 
 	@Override
@@ -54,6 +76,38 @@ public class Game extends BasicGame {
 		
 		updatePlayerShip(container, delta, input);		
 		updateBullets(container, delta);
+		updateAsteroids(container, delta);
+		detectCollisions();
+	}
+	
+	private void updateAsteroids(GameContainer container, int delta) {
+		Iterator<Asteroid> asteroidIterator = AsteroidFactory.asteroids.iterator();
+		while (asteroidIterator.hasNext()) {
+			Asteroid asteroid = asteroidIterator.next();
+			
+			asteroid.update(delta);
+			
+			if (asteroid.getX() > container.getWidth()) {
+				asteroid.setX(0);
+			}
+			
+			if (asteroid.getX() < 0) {
+				asteroid.setX(container.getWidth());
+			}
+			
+			if (asteroid.getY() > container.getHeight()) {
+				asteroid.setY(0);
+			}
+			
+			if (asteroid.getY() < 0) {
+				asteroid.setY(container.getHeight());
+			}
+		}
+	}
+	
+	private void detectCollisions() {
+		EntityCollisions collisions = new EntityCollisions();
+		collisions.detect();
 	}
 
 	private void updateBullets(GameContainer container, int delta) {
@@ -107,7 +161,7 @@ public class Game extends BasicGame {
 	public static void main(String[] args) {
 		try { 
 		    AppGameContainer container = new AppGameContainer(new Game()); 
-		    container.setDisplayMode(800,600,false); 
+		    container.setDisplayMode(Constants.CONTAINER_WIDTH,Constants.CONTAINER_HEIGHT,false); 
 		    container.setVSync(true);
 		    container.start();
 		} catch (SlickException e) { 

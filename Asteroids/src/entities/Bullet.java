@@ -3,7 +3,7 @@ package entities;
 import org.newdawn.slick.geom.Circle;
 import org.newdawn.slick.geom.Shape;
 
-public class Bullet implements Entity {
+public class Bullet extends Entity {
 	private float velocity = 0.6f;
 	private float rotation = 0.0f;
 	private Shape shape;
@@ -29,7 +29,7 @@ public class Bullet implements Entity {
 	}
 
 	@Override
-	public Object getDrawable() {
+	public Shape getDrawable() {
 		return shape;
 	}
 
@@ -41,5 +41,23 @@ public class Bullet implements Entity {
 	
 	public int getPlayerId() {
 		return playerId;
+	}
+
+	@Override
+	public void handleCollision(Asteroid asteroidOther) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void handleCollision(Bullet bulletOther) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void handleCollision(Ship shipOther) {
+		// TODO Auto-generated method stub
+		
 	}
 }

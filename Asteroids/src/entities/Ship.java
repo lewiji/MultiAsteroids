@@ -1,15 +1,16 @@
 package entities;
 
 import org.newdawn.slick.geom.Polygon;
+import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.geom.Transform;
 import org.newdawn.slick.geom.Vector2f;
 
-public class Ship implements Entity {
+public class Ship extends Entity {
 	private Polygon ship = null;
 	private Vector2f thrust = new Vector2f();
 	private float rotation = 0.0f;
 	
-	private float maxThrust = 0.4f;
+	private float maxThrust = 0.2f;
 	private float acceleration = 0.02f;
 	
 	private static int playerCount = 0;
@@ -84,7 +85,7 @@ public class Ship implements Entity {
 	}
 
 	@Override
-	public Object getDrawable() {
+	public Shape getDrawable() {
 		return ship;
 	}
 
@@ -95,5 +96,23 @@ public class Ship implements Entity {
 
 	public int getPlayerId() {
 		return playerId;
+	}
+
+	@Override
+	public void handleCollision(Asteroid asteroidOther) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void handleCollision(Bullet bulletOther) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void handleCollision(Ship shipOther) {
+		// TODO Auto-generated method stub
+		
 	}
 }
