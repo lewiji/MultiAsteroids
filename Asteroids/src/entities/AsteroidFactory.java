@@ -12,5 +12,6 @@ public class AsteroidFactory {
 	
 	public static void removeAsteroid(Asteroid anAsteroid) {
 		asteroids.remove(anAsteroid);
+		anAsteroid.remove();
 	}
 }

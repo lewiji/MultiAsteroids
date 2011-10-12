@@ -26,12 +26,16 @@ public abstract class Entity {
 	
 	public abstract void goneOffScreen();
 	
+	public boolean toBeDestroyed = false;
+	
 	public void handleCollision(Entity entity) {
 		if (entity.getClass() == Asteroid.class) {
 			handleCollision((Asteroid) entity);
-		} else if (entity.getClass() == Bullet.class) {
+		} 
+		if (entity.getClass() == Bullet.class) {
 			handleCollision((Bullet) entity);
-		} else if (entity.getClass() == Ship.class) {
+		}
+		if (entity.getClass() == Ship.class) {
 			handleCollision((Ship) entity);
 		}
 	}

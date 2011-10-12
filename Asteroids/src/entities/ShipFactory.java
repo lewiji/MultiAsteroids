@@ -12,5 +12,6 @@ public class ShipFactory {
 	
 	public static void removeShip(Ship aShip) {
 		ships.remove(aShip);
+		aShip.remove();
 	}
 }

@@ -100,7 +100,7 @@ public class Ship extends Entity {
 
 	@Override
 	public void handleCollision(Asteroid asteroidOther) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
@@ -112,7 +112,7 @@ public class Ship extends Entity {
 
 	@Override
 	public void handleCollision(Ship shipOther) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 }

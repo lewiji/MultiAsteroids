@@ -12,5 +12,6 @@ public class BulletFactory {
 	
 	public static void removeBullet(Bullet aBullet) {
 		bullets.remove(aBullet);
+		aBullet.remove();
 	}
 }

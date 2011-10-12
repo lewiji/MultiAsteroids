@@ -62,11 +62,16 @@ public class Game extends BasicGame {
 	public void init(GameContainer container) throws SlickException {
 		playerShip = new Ship();
 		ShipFactory.addShip(playerShip);
-		AsteroidFactory.addAsteroid(new Asteroid());
+		AsteroidFactory.addAsteroid(new Asteroid(Constants.ASTEROID_SIZE_BIGGEST));
 
-		AsteroidFactory.addAsteroid(new Asteroid());
+		AsteroidFactory.addAsteroid(new Asteroid(Constants.ASTEROID_SIZE_BIGGEST));
 
-		AsteroidFactory.addAsteroid(new Asteroid());
+		AsteroidFactory.addAsteroid(new Asteroid(Constants.ASTEROID_SIZE_BIGGEST));
+		AsteroidFactory.addAsteroid(new Asteroid(Constants.ASTEROID_SIZE_BIGGEST));
+
+		AsteroidFactory.addAsteroid(new Asteroid(Constants.ASTEROID_SIZE_BIGGEST));
+
+		AsteroidFactory.addAsteroid(new Asteroid(Constants.ASTEROID_SIZE_BIGGEST));
 	}
 
 	@Override
