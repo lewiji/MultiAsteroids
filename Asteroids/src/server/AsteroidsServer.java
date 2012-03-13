@@ -14,6 +14,7 @@ import org.newdawn.slick.geom.Polygon;
 import org.newdawn.slick.geom.Vector2f;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.serialize.ClassSerializer;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
@@ -76,6 +77,8 @@ public class AsteroidsServer extends BasicGame {
 		kryo.register(float[].class);
 		kryo.register(HashMap.class);
 		kryo.register(Entity.class);
+		kryo.register(Class.class, new ClassSerializer(kryo));
+		kryo.register(ArrayList.class);
 		
 		server.addListener(new Listener() {
 			   public void received (Connection connection, Object object) {
@@ -92,13 +95,8 @@ public class AsteroidsServer extends BasicGame {
 			    	  System.out.println("Entity request recieved from " + request.getPlayerId());
 			    	  
 			    	  EntityResponse response = new EntityResponse();
-			    	  EntityResponse.entities = Entity.entities;
+			    	  response.entities = Entity.entities;
 			    	  connection.sendTCP(response);
-			    	  
-		    		  for (Entity roid : Entity.getEntitiesByClass(Asteroid.class)) {
-			    		  connection.sendTCP(roid);
-		    		  }
-			    	  
 			      }
 			   }
 			}); 

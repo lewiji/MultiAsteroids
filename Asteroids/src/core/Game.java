@@ -4,6 +4,7 @@
 package core;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -16,12 +17,13 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.geom.Polygon;
 import org.newdawn.slick.geom.Vector2f;
 
-import server.EntityRequest;
 import server.ConnectionRequest;
 import server.ConnectionResponse;
+import server.EntityRequest;
 import server.EntityResponse;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.serialize.ClassSerializer;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
@@ -39,6 +41,7 @@ public class Game extends BasicGame {
 	Ship playerShip;
 	
 	Client client;
+	KryoListener listener = new KryoListener();
 	
 	
 	public Game() {
@@ -49,13 +52,12 @@ public class Game extends BasicGame {
 	public void render(GameContainer container, Graphics g)
 			throws SlickException {
 		Iterator<Entity> entityIterator = Entity.getAllEntities().iterator();
+
 		while (entityIterator.hasNext()) {
 			Entity entity = entityIterator.next();
 			entity.render(g);
 		}
 		
-		
-
 	}
 
 	@Override
@@ -84,24 +86,14 @@ public class Game extends BasicGame {
 		kryo.register(float[].class);
 		kryo.register(HashMap.class);
 		kryo.register(Entity.class);
+		kryo.register(Class.class, new ClassSerializer(kryo));
+		kryo.register(ArrayList.class);
 		
 		ConnectionRequest connectionRequest = new ConnectionRequest();
 		connectionRequest.setPlayerId(playerShip.getPlayerId());
 		client.sendTCP(connectionRequest);
 		
-		client.addListener(new Listener() {
-			   public void received (Connection connection, Object object) {
-			      if (object instanceof ConnectionResponse) {
-			         ConnectionResponse response = (ConnectionResponse)object;
-			         System.out.println(response.getPlayerId());
-			         
-			      }
-			      else if (object instanceof EntityResponse) {
-			    	  Entity.entities.clear();
-			    	  Entity.entities = ((EntityResponse)object).entities;
-			      }
-			   }
-			});
+		client.addListener(listener);
 	}
 
 	@Override
@@ -118,6 +110,7 @@ public class Game extends BasicGame {
 	}
 	
 	private void updateEntities() {
+		
 		EntityRequest request = new EntityRequest();
 		client.sendTCP(request);
 	}
@@ -188,6 +181,21 @@ public class Game extends BasicGame {
 		    e.printStackTrace(); 
 		}
 
+	}
+	
+	class KryoListener extends Listener {
+
+	   public void received (Connection connection, Object object) {
+
+			if (object instanceof ConnectionResponse) {
+			         ConnectionResponse response = (ConnectionResponse)object;
+			         System.out.println(response.getPlayerId());
+			}
+			else if (object instanceof EntityResponse) {
+				  Entity.entities.clear();
+				  Entity.entities = ((EntityResponse)object).entities;
+			}
+	   }
 	}
 
 }
