@@ -1,5 +1,6 @@
 package entities;
 
+import org.newdawn.slick.Graphics;
 import org.newdawn.slick.geom.Circle;
 import org.newdawn.slick.geom.Shape;
 
@@ -11,21 +12,19 @@ public class Bullet extends Entity {
 	
 	public Bullet(float rot, float x, float y, int aPlayerId) {
 		rotation = rot;
-		shape = new Circle(x, y, 3.0f);
+		position.x = x;
+		position.y = y;
+		shape = new Circle(position.x, position.y, 3.0f);
+		radius = shape.getBoundingCircleRadius();
 		playerId = aPlayerId;
 	}
 	
 	public void update(int delta) {
-		shape.setCenterX((float) (shape.getCenterX() - Math.sin(rotation) * velocity * delta));
-		shape.setCenterY((float) (shape.getCenterY() - -Math.cos(rotation) * velocity * delta));
-	}
-
-	public float getX() {
-		return shape.getCenterX();
-	}
-
-	public float getY() {
-		return shape.getCenterY();
+		position.x = (float) (position.x - Math.sin(rotation) * velocity * delta);
+		position.y = (float) (position.y - -Math.cos(rotation) * velocity * delta);
+		shape.setCenterX(position.x);
+		shape.setCenterY(position.y);
+		
 	}
 
 	@Override
@@ -45,7 +44,7 @@ public class Bullet extends Entity {
 
 	@Override
 	public void handleCollision(Asteroid asteroidOther) {
-		BulletFactory.removeBullet(this);
+		this.toBeDestroyed = true;
 		
 	}
 
@@ -58,6 +57,12 @@ public class Bullet extends Entity {
 	@Override
 	public void handleCollision(Ship shipOther) {
 		//BulletFactory.removeBullet(this);
+		
+	}
+	
+	@Override
+	public void render(Graphics g) {
+		g.draw(shape);
 		
 	}
 }

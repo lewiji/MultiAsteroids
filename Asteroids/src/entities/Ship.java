@@ -1,44 +1,95 @@
 package entities;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Random;
+
+import org.newdawn.slick.Color;
+import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Image;
+import org.newdawn.slick.SlickException;
 import org.newdawn.slick.geom.Polygon;
 import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.geom.Transform;
 import org.newdawn.slick.geom.Vector2f;
+import org.newdawn.slick.particles.ConfigurableEmitter;
+import org.newdawn.slick.particles.ParticleIO;
+import org.newdawn.slick.particles.ParticleSystem;
+
+import core.Constants;
 
 public class Ship extends Entity {
 	private Polygon ship = null;
 	private Vector2f thrust = new Vector2f();
 	private float rotation = 0.0f;
 	
-	private float maxThrust = 0.2f;
-	private float acceleration = 0.02f;
+	private float maxThrust = 0.4f;
+	private float acceleration = 0.015f;
 	
 	private static int playerCount = 0;
 	private int playerId;
 	
+	public ParticleSystem particleSystem;
+	private ConfigurableEmitter emitter1;
+	private int mode = ParticleSystem.BLEND_COMBINE;
+	
+	private boolean dead = false;
+	private int deadTime = Constants.DEAD_TIME;
+	public boolean invulnerable = false;
+	private int invulnerableTime = Constants.INVULNERABILITY_TIME;
+	
 	public Ship() {
+		position.x = 0;
+		position.y = 0;
+		
 		ship = new Polygon();
 		ship.addPoint(0.0f, 0.0f);
 		ship.addPoint(20.0f, 0.0f);
 		ship.addPoint(10.0f, 20.0f);
+		ship.setCenterX(position.x);
+		ship.setCenterY(position.y);
+		
+		resetShip();
+		
+		radius = ship.getBoundingCircleRadius();
+		
 		playerId = playerCount;
 		playerCount++;
+
+		try {
+			Image image = new Image("resources/particle/part.png");
+			particleSystem = new ParticleSystem(image);
+		} catch (SlickException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		File emitterFile = new File("resources/particle/shipThrust.xml");
+		try {
+			emitter1 = ParticleIO.loadEmitter(emitterFile);
+			emitter1.setPosition(position.x, position.y);
+			emitter1.usePoints = 0;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		particleSystem.addEmitter(emitter1);
+		particleSystem.setBlendingMode(mode);
+		particleSystem.setUsePoints(false);
+		particleSystem.setVisible(true);
 	}
 	
 	private void pointAtMouse(float mouseX, float mouseY) {
 		
-		float shipAngle = (float) (Math.atan2( mouseY - ship.getCenterY(), mouseX - ship.getCenterX()));
-		shipAngle += Math.toRadians(-90);
-		
-		ship = (Polygon) ship.transform(Transform.createRotateTransform(shipAngle - rotation, ship.getCenterX(), ship.getCenterY()));
-				
-		rotation = shipAngle;
+		float newShipAngle = (float) (Math.atan2( mouseY - position.y, mouseX - position.x));
+		newShipAngle += Math.toRadians(-90);
+		ship = (Polygon) ship.transform(Transform.createRotateTransform(newShipAngle - rotation, 
+																		position.x, position.y));
+		rotation = newShipAngle;
 	}
 	
 	public void update(float mouseX, float mouseY, int delta) {
 		pointAtMouse(mouseX, mouseY);
-		ship.setCenterY(ship.getCenterY() - (thrust.y * delta));
-		ship.setCenterX(ship.getCenterX() - (thrust.x * delta));
+		update(delta);
 	}
 	
 	public void thrust() {
@@ -58,20 +109,12 @@ public class Ship extends Entity {
 		}
 	}
 	
-	public float getX() {
-		return ship.getCenterX();
-	}
-	
-	public float getY() {
-		return ship.getCenterY();
-	}
-	
 	public void setX(float x) {
-		ship.setCenterX(x);
+		position.x = x;
 	}
 	
 	public void setY(float y) {
-		ship.setCenterY(y);
+		position.y = y;
 	}
 
 	public float getAngle() {
@@ -80,8 +123,39 @@ public class Ship extends Entity {
 
 	@Override
 	public void update(int delta) {
-		ship.setCenterY(ship.getCenterY() - (thrust.y * delta));
-		ship.setCenterX(ship.getCenterX() - (thrust.x * delta));
+		position.x = position.x - (thrust.x * delta);
+		position.y = position.y - (thrust.y * delta);
+		ship.setCenterX(position.x);
+		ship.setCenterY(position.y);
+		emitter1.setPosition(position.x, position.y);
+		particleSystem.update(delta);
+		
+		if (dead && deadTime > 0) {
+			position.x = -100;
+			position.y = -100;
+			deadTime -= delta;
+		} else if (dead && deadTime <= 0) {
+			resetShip();
+		}
+		
+		if (invulnerable && invulnerableTime > 0) {
+			invulnerableTime -= delta;
+		} else if (invulnerable && invulnerableTime <= 0) {
+			invulnerableTime = Constants.INVULNERABILITY_TIME;
+			invulnerable = false;
+		}
+	}
+	
+	private void resetShip() {
+		Random random = new Random();
+		position.x = random.nextFloat() * Constants.CONTAINER_WIDTH;
+		position.y = random.nextFloat() * Constants.CONTAINER_HEIGHT;
+		dead = false;
+		thrust.x = 0;
+		thrust.y = 0;
+		deadTime = Constants.DEAD_TIME;
+		invulnerableTime = Constants.INVULNERABILITY_TIME;
+		invulnerable = true;
 	}
 
 	@Override
@@ -100,19 +174,40 @@ public class Ship extends Entity {
 
 	@Override
 	public void handleCollision(Asteroid asteroidOther) {
-		
-		
+		if (!invulnerable) {
+			killShip();
+		}
 	}
 
 	@Override
 	public void handleCollision(Bullet bulletOther) {
-		// TODO Auto-generated method stub
+		if (!invulnerable && bulletOther.getPlayerId() != playerId) {
+			killShip();
+		}
 		
 	}
 
 	@Override
 	public void handleCollision(Ship shipOther) {
+		if (!invulnerable) {
+			killShip();
+		}
 		
-		
+	}
+	
+	public void killShip() {
+		dead = true;
+	}
+	
+	@Override
+	public void render(Graphics g) {
+		if (invulnerable) {
+			g.setColor(Color.green);
+			g.draw(ship);
+			g.setColor(Color.white);
+		} else {
+			g.draw(ship);
+		}
+		particleSystem.render();
 	}
 }

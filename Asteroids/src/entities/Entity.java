@@ -1,30 +1,68 @@
 package entities;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 
+import org.newdawn.slick.Graphics;
 import org.newdawn.slick.geom.Shape;
+import org.newdawn.slick.geom.Vector2f;
 
 public abstract class Entity {
-	public static List<Entity> entityList = new ArrayList<Entity>();
+	protected Vector2f position = new Vector2f();
+	protected float radius = 0;
+	
+	public static HashMap<Class<? extends Entity>, List<Entity>> entities = new HashMap<Class<? extends Entity>, List<Entity>>();
 	
 	public Entity() {
-		entityList.add(this);
+		if (entities.get(this.getClass()) == null) {
+			ArrayList<Entity> someEntities = new ArrayList<Entity>();
+			someEntities.add(this);
+			entities.put(this.getClass(), someEntities);
+		} else {
+			entities.get(this.getClass()).add(this);
+		}
 	}
 	
 	public void remove() {
-		entityList.remove(this);
+		List<Entity> someEntities = entities.get(this.getClass());
+		someEntities.remove(this);
+	}
+	
+	public static List<Entity> getEntitiesByClass(Class<? extends Entity> entityClass) {
+		List<Entity> theEntities = entities.get(entityClass);
+		if (theEntities == null) {
+			theEntities = new ArrayList<Entity>();
+		}
+		return theEntities;
+	}
+	
+	public static List<Entity> getAllEntities() {
+		ArrayList<Entity> entitiesList = new ArrayList<Entity>();
+		Iterator<Entry<Class<? extends Entity>, List<Entity>>> entityMapIterator = entities.entrySet().iterator();
+		while (entityMapIterator.hasNext()) {
+			entitiesList.addAll(entityMapIterator.next().getValue());
+		}
+		return entitiesList;
 	}
 	
 	public abstract void update(int delta);
 	
 	public abstract Shape getDrawable();
 	
-	public abstract float getX();
-
-	public abstract float getY();
+	public Vector2f getPosition() {
+		return position;
+	}
+	
+	public float getRadius() {
+		return radius;
+	}
 	
 	public abstract void goneOffScreen();
+	
+	public abstract void render(Graphics g);
 	
 	public boolean toBeDestroyed = false;
 	

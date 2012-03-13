@@ -2,6 +2,7 @@ package entities;
 
 import java.util.Random;
 
+import org.newdawn.slick.Graphics;
 import org.newdawn.slick.geom.Polygon;
 import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.geom.Transform;
@@ -15,10 +16,15 @@ public class Asteroid extends Entity {
 	private Polygon shape;
 	private float size;
 	
-	public Asteroid(float aSize) {
+	public Asteroid() {
+		
+	}
+	
+	public Asteroid(float aSize, float x, float y, float rot, float rotVelocity) {
 		shape = new Polygon();
-		Random rnd = new Random();
 		size = aSize;
+		position.x = x;
+		position.y = y;
 		
 		shape.addPoint(0.0f * aSize, 0.0f  * aSize);
 		shape.addPoint(60.0f * aSize, 20.0f * aSize);
@@ -27,8 +33,10 @@ public class Asteroid extends Entity {
 		shape.addPoint(40.0f * aSize, 38.0f * aSize);
 		shape.addPoint(20.0f * aSize, 20.0f * aSize);
 		shape.addPoint(0.0f * aSize, 15.0f * aSize);
-		shape.setCenterX(rnd.nextInt(Constants.CONTAINER_WIDTH));
-		shape.setCenterY(rnd.nextInt(Constants.CONTAINER_HEIGHT));
+		shape.setCenterX(position.x);
+		shape.setCenterY(position.y);
+		
+		radius = shape.getBoundingCircleRadius();
 		
 		if (aSize == Constants.ASTEROID_SIZE_SMALLER) {
 			velocity *= 2;
@@ -38,23 +46,51 @@ public class Asteroid extends Entity {
 			velocity *= 4;
 		}
 		
-		rotation = (float) (rnd.nextFloat() * Math.PI);
-		rotationVelocity = (float) (rnd.nextFloat() * rotationVelocity);
+		rotation = rot;
+		rotationVelocity = rotVelocity;
+		
 		
 		shape = (Polygon) shape.transform(Transform.createRotateTransform(rotation));
 	}
 	
-	public Asteroid(float aSize, float f, float g) {
-		this(aSize);
-		shape.setCenterX(f);
-		shape.setCenterY(g);
+	public Asteroid (float aSize, float x, float y) {
+		this(aSize, x, y, 0, 0);
+		Random rnd = new Random();
+		rotation = (float) (rnd.nextFloat() * Math.PI);
+		rotationVelocity = (float) (rnd.nextFloat() * Math.PI * rotationVelocity);
+	}
+	
+	public Asteroid (float aSize) {
+		this(aSize, 0, 0);
+		Random rnd = new Random();
+		position.x = (float) (rnd.nextFloat() * (Constants.CONTAINER_WIDTH - radius));
+		position.y = (float) (rnd.nextFloat() * (Constants.CONTAINER_HEIGHT - radius));
 	}
 
 	@Override
 	public void update(int delta) {
-		shape.setCenterX((float) (shape.getCenterX() - Math.sin(rotation) * velocity * delta));
-		shape.setCenterY((float) (shape.getCenterY() - -Math.cos(rotation) * velocity * delta));
-		shape = (Polygon) shape.transform(Transform.createRotateTransform(rotationVelocity, shape.getCenterX(), shape.getCenterY()));
+		position.x = (float) (position.x - Math.sin(rotation) * velocity * delta);
+		position.y = (float) (position.y - -Math.cos(rotation) * velocity * delta);
+		
+		if (position.x > Constants.CONTAINER_WIDTH + radius) {
+			position.x = 0 - radius;
+		}
+		
+		if (position.x < 0 - radius) {
+			position.x = Constants.CONTAINER_WIDTH + radius;
+		}
+		
+		if (position.y > Constants.CONTAINER_HEIGHT + radius) {
+			position.y = 0 - radius;
+		}
+		
+		if (position.y < 0 - radius) {
+			position.y = Constants.CONTAINER_HEIGHT + radius;
+		}
+		
+		shape.setCenterX(position.x);
+		shape.setCenterY(position.y);
+		shape = (Polygon) shape.transform(Transform.createRotateTransform(rotationVelocity, position.x, position.y));
 	}
 
 	@Override
@@ -63,47 +99,31 @@ public class Asteroid extends Entity {
 	}
 
 	@Override
-	public float getX() {
-		return shape.getCenterX();
-	}
-
-	@Override
-	public float getY() {
-		return shape.getCenterY();
-	}
-
-	@Override
 	public void goneOffScreen() {
 		// TODO Auto-generated method stub
 
 	}
 
-	public void setY(int y) {
-		shape.setCenterY(y);
-	}
-	
-	public void setX(int x) {
-		shape.setCenterX(x);
-	}
-
 	@Override
 	public void handleCollision(Asteroid asteroidOther) {
-		this.explode();
+		
 	}
 
 	private void explode() {
 		if (size == Constants.ASTEROID_SIZE_BIGGEST) {
-			AsteroidFactory.addAsteroid(new Asteroid(Constants.ASTEROID_SIZE_SMALLER, this.getX() + 40, this.getY()));
-			AsteroidFactory.addAsteroid(new Asteroid(Constants.ASTEROID_SIZE_SMALLER, this.getX() - 40, this.getY()));
-			AsteroidFactory.addAsteroid(new Asteroid(Constants.ASTEROID_SIZE_SMALLER, this.getX(), this.getY() + 40));
-			AsteroidFactory.addAsteroid(new Asteroid(Constants.ASTEROID_SIZE_SMALLER, this.getX(), this.getY() - 40));
+			new Asteroid(Constants.ASTEROID_SIZE_SMALLER, position.x + radius/2, position.y + radius/2);
+			new Asteroid(Constants.ASTEROID_SIZE_SMALLER, position.x - radius/2, position.y - radius/2);
+			new Asteroid(Constants.ASTEROID_SIZE_SMALLER, position.x - radius/2, position.y + radius/2);
+			new Asteroid(Constants.ASTEROID_SIZE_SMALLER, position.x + radius/2, position.y - radius/2);
 		} else if (size == Constants.ASTEROID_SIZE_SMALLER) {
-			AsteroidFactory.addAsteroid(new Asteroid(Constants.ASTEROID_SIZE_SMALLEST, this.getX() + 20, this.getY()));
-			AsteroidFactory.addAsteroid(new Asteroid(Constants.ASTEROID_SIZE_SMALLEST, this.getX() - 20, this.getY()));
-			AsteroidFactory.addAsteroid(new Asteroid(Constants.ASTEROID_SIZE_SMALLEST, this.getX(), this.getY() + 20));
+			new Asteroid(Constants.ASTEROID_SIZE_SMALLEST, position.x + radius/2, position.y + radius/2);
+			new Asteroid(Constants.ASTEROID_SIZE_SMALLEST, position.x - radius/2, position.y - radius/2);
+			new Asteroid(Constants.ASTEROID_SIZE_SMALLEST, position.x - radius/2, position.y + radius/2);
+			new Asteroid(Constants.ASTEROID_SIZE_SMALLEST, position.x + radius/2, position.y + radius/2);
+			new Asteroid(Constants.ASTEROID_SIZE_SMALLEST, position.x - radius/2, position.y - radius/2);
+			new Asteroid(Constants.ASTEROID_SIZE_SMALLEST, position.x - radius/2, position.y + radius/2);
 		}
-		AsteroidFactory.removeAsteroid(this);
-		this.remove();
+		toBeDestroyed = true;
 	}
 
 	@Override
@@ -113,7 +133,14 @@ public class Asteroid extends Entity {
 
 	@Override
 	public void handleCollision(Ship shipOther) {
-		this.explode();
+		if (!shipOther.invulnerable)
+			this.explode();
+	}
+
+	@Override
+	public void render(Graphics g) {
+		g.draw(shape);
+		
 	}
 
 }
