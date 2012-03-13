@@ -12,6 +12,7 @@ import org.newdawn.slick.geom.Polygon;
 import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.geom.Transform;
 import org.newdawn.slick.geom.Vector2f;
+import org.newdawn.slick.loading.LoadingList;
 import org.newdawn.slick.particles.ConfigurableEmitter;
 import org.newdawn.slick.particles.ParticleIO;
 import org.newdawn.slick.particles.ParticleSystem;
@@ -21,17 +22,13 @@ import core.Constants;
 public class Ship extends Entity {
 	private Polygon ship = null;
 	private Vector2f thrust = new Vector2f();
-	private float rotation = 0.0f;
+	public float rotation = 0.0f;
 	
 	private float maxThrust = 0.4f;
 	private float acceleration = 0.015f;
 	
-	private static int playerCount = 0;
-	private int playerId;
+	public int playerId;
 	
-	public ParticleSystem particleSystem;
-	private ConfigurableEmitter emitter1;
-	private int mode = ParticleSystem.BLEND_COMBINE;
 	
 	private boolean dead = false;
 	private int deadTime = Constants.DEAD_TIME;
@@ -53,29 +50,8 @@ public class Ship extends Entity {
 		
 		radius = ship.getBoundingCircleRadius();
 		
-		playerId = playerCount;
-		playerCount++;
-
-		try {
-			Image image = new Image("resources/particle/part.png");
-			particleSystem = new ParticleSystem(image);
-		} catch (SlickException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		File emitterFile = new File("resources/particle/shipThrust.xml");
-		try {
-			emitter1 = ParticleIO.loadEmitter(emitterFile);
-			emitter1.setPosition(position.x, position.y);
-			emitter1.usePoints = 0;
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		particleSystem.addEmitter(emitter1);
-		particleSystem.setBlendingMode(mode);
-		particleSystem.setUsePoints(false);
-		particleSystem.setVisible(true);
+        
+		
 	}
 	
 	private void pointAtMouse(float mouseX, float mouseY) {
@@ -127,8 +103,7 @@ public class Ship extends Entity {
 		position.y = position.y - (thrust.y * delta);
 		ship.setCenterX(position.x);
 		ship.setCenterY(position.y);
-		emitter1.setPosition(position.x, position.y);
-		particleSystem.update(delta);
+
 		
 		if (dead && deadTime > 0) {
 			position.x = -100;
@@ -208,6 +183,5 @@ public class Ship extends Entity {
 		} else {
 			g.draw(ship);
 		}
-		particleSystem.render();
 	}
 }

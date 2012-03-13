@@ -6,5 +6,5 @@ import java.util.List;
 import entities.Entity;
 
 public class EntityResponse extends RequestResponse {
-	public HashMap<Class<? extends Entity>, List<Entity>> entities = new HashMap<Class<? extends Entity>, List<Entity>>();
+	public Entity entity;
 }

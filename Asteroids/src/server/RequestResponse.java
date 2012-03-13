@@ -1,13 +1,13 @@
 package server;
 
 public abstract class RequestResponse {
-	private int playerId;
+	private int entityId;
 
-	public int getPlayerId() {
-		return playerId;
+	public int getEntityId() {
+		return entityId;
 	}
 
-	public void setPlayerId(int playerId) {
-		this.playerId = playerId;
+	public void setEntityId(int entityId) {
+		this.entityId = entityId;
 	}
 }

@@ -11,10 +11,10 @@ import core.Constants;
 
 public class Asteroid extends Entity {
 	private float velocity = 0.01f;
-	private float rotation = 0.0f;
+	public float rotation = 0.0f;
 	private float rotationVelocity = 0.01f;
 	private Polygon shape;
-	private float size;
+	public float size;
 	
 	public Asteroid() {
 		
@@ -140,7 +140,6 @@ public class Asteroid extends Entity {
 	@Override
 	public void render(Graphics g) {
 		g.draw(shape);
-		
 	}
 
 }

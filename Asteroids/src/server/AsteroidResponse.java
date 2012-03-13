@@ -1,7 +1,9 @@
 package server;
 
 public class AsteroidResponse extends RequestResponse {
-	float x;
-	float y;
-	float rot;
+	public float x;
+	public float y;
+	public float rot;
+	public float size;
+	public int id;
 }

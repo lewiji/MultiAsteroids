@@ -17,5 +17,11 @@
 			<attribute name="javadoc_location" value="file:/F:/Dropbox/Dropbox/Uni/Games/Asteroids/slick/javadoc/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="/Users/lewiji/Downloads/kryonet-1.04/onejar/kryonet-1.04-all.jar" sourcepath="/Users/lewiji/Downloads/kryonet-1.04/kryonet">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/Users/lewiji/Downloads/kryonet-1.04/api/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/kryonet-1.04-all.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

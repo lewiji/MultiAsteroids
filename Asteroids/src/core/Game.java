@@ -14,23 +14,21 @@ import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
-import org.newdawn.slick.geom.Polygon;
-import org.newdawn.slick.geom.Vector2f;
 
+import server.AsteroidRequest;
+import server.AsteroidResponse;
 import server.ConnectionRequest;
 import server.ConnectionResponse;
-import server.EntityRequest;
-import server.EntityResponse;
+import server.KryoRegistration;
+import server.PlayerShipRequest;
 
 import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.serialize.ClassSerializer;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
 import entities.Asteroid;
 import entities.Bullet;
-import entities.Entity;
 import entities.Ship;
 
 /**
@@ -40,9 +38,13 @@ import entities.Ship;
 public class Game extends BasicGame {
 	Ship playerShip;
 	
-	Client client;
-	KryoListener listener = new KryoListener();
+	Client client;	
 	
+	HashMap<Integer, Asteroid> asteroids = new HashMap<Integer, Asteroid>();
+	ArrayList<Ship> ships = new ArrayList<Ship>();
+	ArrayList<Bullet> bullets = new ArrayList<Bullet>();
+	
+	boolean rendering = false;
 	
 	public Game() {
 		super("Asteroids");
@@ -51,13 +53,27 @@ public class Game extends BasicGame {
 	@Override
 	public void render(GameContainer container, Graphics g)
 			throws SlickException {
-		Iterator<Entity> entityIterator = Entity.getAllEntities().iterator();
+		
+		HashMap<Integer, Asteroid> asteroidsCopy = (HashMap<Integer, Asteroid>) asteroids.clone();
 
-		while (entityIterator.hasNext()) {
-			Entity entity = entityIterator.next();
+		for (int i = 0; i < asteroids.size(); i++) {
+			Asteroid entity = asteroids.get(i);
 			entity.render(g);
 		}
 		
+		/*Iterator<Ship> shipIter = ships.iterator();
+
+		while (shipIter.hasNext()) {
+			Ship entity = shipIter.next();
+			entity.render(g);
+		}
+		
+		Iterator<Bullet> bulletIter = bullets.iterator();
+
+		while (bulletIter.hasNext()) {
+			Bullet entity = bulletIter.next();
+			entity.render(g);
+		}*/
 	}
 
 	@Override
@@ -76,24 +92,36 @@ public class Game extends BasicGame {
 			e.printStackTrace();
 		}
 		Kryo kryo = client.getKryo();
-		kryo.register(ConnectionRequest.class);
-		kryo.register(ConnectionResponse.class);
-		kryo.register(EntityRequest.class);
-		kryo.register(EntityResponse.class);
-		kryo.register(Asteroid.class);
-		kryo.register(Vector2f.class);
-		kryo.register(Polygon.class);
-		kryo.register(float[].class);
-		kryo.register(HashMap.class);
-		kryo.register(Entity.class);
-		kryo.register(Class.class, new ClassSerializer(kryo));
-		kryo.register(ArrayList.class);
+		KryoRegistration.register(kryo);
 		
 		ConnectionRequest connectionRequest = new ConnectionRequest();
-		connectionRequest.setPlayerId(playerShip.getPlayerId());
 		client.sendTCP(connectionRequest);
 		
-		client.addListener(listener);
+		client.addListener(new Listener() {
+			public void received (Connection connection, Object object) {
+
+				if (object instanceof ConnectionResponse) {
+				         ConnectionResponse response = (ConnectionResponse)object;
+				         System.out.println(response.getPlayerId());
+				         playerShip.playerId = response.getPlayerId();
+				}
+				else if (object instanceof AsteroidResponse) {
+					AsteroidResponse response = (AsteroidResponse)object;
+					Asteroid roid = asteroids.get(response.id);
+					if (roid != null) {
+						roid.position.x = response.x;
+						roid.position.y = response.y;
+						roid.rotation = response.rot;
+						roid.size = response.size;
+					} else {
+						Asteroid newRoid = new Asteroid(response.size, response.x, response.y);
+						newRoid.rotation = response.rot;
+						asteroids.put(response.id, newRoid);
+					}
+					
+				}
+		   }
+		});
 	}
 
 	@Override
@@ -101,18 +129,17 @@ public class Game extends BasicGame {
 			throws SlickException {
 		Input input = container.getInput();
 		
-		/*updatePlayerShip(container, delta, input);		
-		updateBullets(container, delta);
+		//updatePlayerShip(container, delta, input);		
+		/*updateBullets(container, delta);
 		detectCollisions();*/
 		
-		updateEntities();
+		updateAsteroids();
 		
 	}
 	
-	private void updateEntities() {
-		
-		EntityRequest request = new EntityRequest();
-		client.sendTCP(request);
+	private void updateAsteroids() {
+			AsteroidRequest request = new AsteroidRequest();
+			client.sendTCP(request);
 	}
 	
 
@@ -120,7 +147,7 @@ public class Game extends BasicGame {
 		//collisions.detect();
 	}
 
-	private void updateBullets(GameContainer container, int delta) {
+	/*private void updateBullets(GameContainer container, int delta) {
 		Iterator<Entity> bulletIterator = Entity.getEntitiesByClass(Bullet.class).iterator();
 		while (bulletIterator.hasNext()) {
 			Bullet bullet = (Bullet) bulletIterator.next();
@@ -136,7 +163,7 @@ public class Game extends BasicGame {
 				bullet = null;
 			}
 		}
-	}
+	}*/
 
 	private void updatePlayerShip(GameContainer container, int delta,
 			Input input) {
@@ -144,10 +171,7 @@ public class Game extends BasicGame {
 		
 		if (input.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON)) {
 			playerShip.thrust();
-			playerShip.particleSystem.getEmitter(0).setEnabled(true);
-		} else {
-			playerShip.particleSystem.getEmitter(0).setEnabled(false);
-		}
+		} 
 		
 		if (input.isMousePressed(Input.MOUSE_RIGHT_BUTTON)) {
 			new Bullet(playerShip.getAngle(), playerShip.getPosition().x, playerShip.getPosition().y, playerShip.getPlayerId());
@@ -168,6 +192,10 @@ public class Game extends BasicGame {
 		if (playerShip.getPosition().y < 0) {
 			playerShip.setY(container.getHeight());
 		}
+		
+		PlayerShipRequest shipRequest = new PlayerShipRequest();
+		shipRequest.ship = playerShip;
+		client.sendTCP(shipRequest);
 	}
 
 
@@ -181,21 +209,6 @@ public class Game extends BasicGame {
 		    e.printStackTrace(); 
 		}
 
-	}
-	
-	class KryoListener extends Listener {
-
-	   public void received (Connection connection, Object object) {
-
-			if (object instanceof ConnectionResponse) {
-			         ConnectionResponse response = (ConnectionResponse)object;
-			         System.out.println(response.getPlayerId());
-			}
-			else if (object instanceof EntityResponse) {
-				  Entity.entities.clear();
-				  Entity.entities = ((EntityResponse)object).entities;
-			}
-	   }
 	}
 
 }
