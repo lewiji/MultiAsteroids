@@ -129,6 +129,10 @@ public class AsteroidsServer extends BasicGame {
 			    	  ShipRequest request = (ShipRequest)object;
 			    	  Ship ship = ships.get(request.playerId);
 			    	  if (ship != null) {
+			    		  if (ship.toBeDestroyed) {
+			    			  ShipDestroyResponse shipDestroy = new ShipDestroyResponse();
+			    			  connection.sendTCP(shipDestroy);
+			    		  }
 			    		  ships.remove(request.playerId);
 			    	  }
 			    	  Ship newShip = new Ship();
@@ -136,6 +140,7 @@ public class AsteroidsServer extends BasicGame {
 						newShip.position.y = request.y;
 						newShip.rotation = request.rot;
 						newShip.playerId = request.playerId;
+						newShip.invulnerable = request.invulnerable;
 						ships.put(request.playerId, newShip);
 						
 						Iterator<Ship> iter = ships.values().iterator();
@@ -151,6 +156,7 @@ public class AsteroidsServer extends BasicGame {
 								connection.sendTCP(response);
 							}
 						}
+						
 			      }
 			      else if (object instanceof BulletUpdate) {
 			    	  BulletUpdate request = (BulletUpdate)object;
@@ -220,6 +226,8 @@ public class AsteroidsServer extends BasicGame {
 		while (roidIter.hasNext()) {
 			Asteroid roid = roidIter.next();
 			if (roid.toBeDestroyed) {
+				
+				// Explode asteroid into smaller pieces
 				if (roid.size == Constants.ASTEROID_SIZE_BIGGEST) {
 					for (int i = 0; i < 3; i++) {
 						Asteroid newRoid = new Asteroid(asteroids.size(), Constants.ASTEROID_SIZE_SMALLER, roid.position.x + roid.radius/2, roid.position.y + roid.radius/2);
@@ -237,6 +245,7 @@ public class AsteroidsServer extends BasicGame {
 						asteroids.put(newRoid.id, newRoid);
 					}
 				}
+				// Destroy original asteroid
 				roidIter.remove();
 			}
 		}		

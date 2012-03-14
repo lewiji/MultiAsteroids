@@ -49,23 +49,8 @@ public class EntityCollisions {
 					// Deal with collisions (individual classes have collision logic)
 					entity.handleCollision(otherEntity);
 					otherEntity.handleCollision(entity);
-					
-					if (otherEntity.toBeDestroyed) {
-						// remove other entity if it's marked as destroyed
-						nearbyEntitiesIterator.remove();
-						otherEntity = null;
-					}
+					System.out.println("Collision");
 				}
-				if (entity.toBeDestroyed) {
-					// If original entity is to be destroyed, no need to detect further collisions
-					break;
-				}
-			}
-			if (entity.toBeDestroyed) {
-				// Remove entity if destroyed, and break out of loop
-				entityIterator.remove();
-				entity = null;
-				break;
 			}
 		}
 	}

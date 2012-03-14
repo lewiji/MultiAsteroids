@@ -25,6 +25,7 @@ import server.BulletUpdate;
 import server.ConnectionRequest;
 import server.ConnectionResponse;
 import server.KryoRegistration;
+import server.ShipDestroyResponse;
 import server.ShipRequest;
 import server.ShipResponse;
 
@@ -139,6 +140,9 @@ public class Game extends BasicGame {
 					newShip.rotation = response.rot;
 					ships.put(response.playerId, newShip);
 				}
+				else if (object instanceof ShipDestroyResponse) {
+					playerShip.killShip();
+				}
 				else if (object instanceof BulletResponse) {
 					BulletResponse response = (BulletResponse)object;
 					bullets.clear();
@@ -208,6 +212,7 @@ public class Game extends BasicGame {
 		shipRequest.x = playerShip.position.x;
 		shipRequest.y = playerShip.position.y;
 		shipRequest.rot = playerShip.rotation;
+		shipRequest.invulnerable = playerShip.invulnerable;
 		client.sendTCP(shipRequest);
 	}
 
