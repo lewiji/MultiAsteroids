@@ -1,9 +1,7 @@
 package server;
 
+import java.util.ArrayList;
+
 public class AsteroidResponse extends RequestResponse {
-	public float x;
-	public float y;
-	public float rot;
-	public float size;
-	public int id;
+	public ArrayList<AsteroidPOJO> asteroids = new ArrayList<AsteroidPOJO>();
 }

@@ -46,5 +46,8 @@ public class KryoRegistration {
 		kryo.register(BulletUpdate.class);
 		kryo.register(BulletResponse.class);
 		kryo.register(BulletRequest.class);
+		kryo.register(AsteroidDestroyResponse.class);
+		kryo.register(AsteroidPOJO.class);
+		kryo.register(BulletPOJO.class);
 	}
 }

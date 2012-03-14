@@ -13,7 +13,7 @@ import org.newdawn.slick.geom.Vector2f;
 public abstract class Entity {
 	public int id;
 	public Vector2f position = new Vector2f();
-	protected float radius = 0;
+	public float radius = 0;
 	
 	public abstract void update(int delta);
 	

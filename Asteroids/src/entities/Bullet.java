@@ -4,6 +4,8 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.geom.Circle;
 import org.newdawn.slick.geom.Shape;
 
+import core.Constants;
+
 public class Bullet extends Entity {
 	private float velocity = 0.5f;
 	private float rotation = 0.0f;
@@ -25,6 +27,12 @@ public class Bullet extends Entity {
 		shape.setCenterX(position.x);
 		shape.setCenterY(position.y);
 		
+		if (position.x > Constants.CONTAINER_WIDTH ||
+			position.x < 0 ||
+			position.y > Constants.CONTAINER_HEIGHT ||
+			position.y < 0) {
+			this.toBeDestroyed = true;
+		}
 	}
 
 	@Override

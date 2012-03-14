@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.BasicGame;
@@ -21,13 +22,14 @@ import core.Constants;
 import core.EntityCollisions;
 import entities.Asteroid;
 import entities.Bullet;
+import entities.Entity;
 import entities.Ship;
 
 public class AsteroidsServer extends BasicGame {
 	
-	HashMap<Integer, Asteroid> asteroids = new HashMap<Integer, Asteroid>();
-	HashMap<Integer, Ship> ships = new HashMap<Integer, Ship>();
-	HashMap<Integer, Bullet> bullets = new HashMap<Integer, Bullet>();
+	ConcurrentHashMap<Integer, Asteroid> asteroids = new ConcurrentHashMap<Integer, Asteroid>();
+	ConcurrentHashMap<Integer, Ship> ships = new ConcurrentHashMap<Integer, Ship>();
+	ConcurrentHashMap<Integer, Bullet> bullets = new ConcurrentHashMap<Integer, Bullet>();
 
 	public AsteroidsServer() {
 		super("AsteroidsServer");
@@ -56,19 +58,19 @@ public class AsteroidsServer extends BasicGame {
 	@Override
 	public void render(GameContainer container, Graphics g)
 			throws SlickException {
-		Iterator<Asteroid> asterIter = ((HashMap<Integer, Asteroid>) asteroids.clone()).values().iterator();
+		Iterator<Asteroid> asterIter = asteroids.values().iterator();
 		while (asterIter.hasNext()) {
 			Asteroid roid = asterIter.next();
 			roid.render(g);
 		}
 		
-		Iterator<Ship> shipIter = ((HashMap<Integer, Ship>) ships.clone()).values().iterator();
+		Iterator<Ship> shipIter = ships.values().iterator();
 		while (shipIter.hasNext()) {
 			Ship ship = shipIter.next();
 			ship.render(g);
 		}
 		
-		Iterator<Bullet> bulletIter = ((HashMap<Integer, Bullet>) bullets.clone()).values().iterator();
+		Iterator<Bullet> bulletIter = bullets.values().iterator();
 		while (bulletIter.hasNext()) {
 			Bullet bullet = bulletIter.next();
 			bullet.render(g);
@@ -87,7 +89,7 @@ public class AsteroidsServer extends BasicGame {
 		}
 		
 		Kryo kryo = server.getKryo();
-		Log.set(Log.LEVEL_DEBUG);
+		Log.set(Log.LEVEL_INFO);
 		
 		KryoRegistration.register(kryo);
 		
@@ -105,16 +107,23 @@ public class AsteroidsServer extends BasicGame {
 			         connection.sendTCP(response);
 			      }
 			      else if (object instanceof AsteroidRequest) {
-			    	  for (int i = 0; i < asteroids.size(); i++) {
-			    		  AsteroidResponse response = new AsteroidResponse();
-			    		  Asteroid roid = asteroids.get(i);
-			    		  response.x = roid.getPosition().x;
-			    		  response.y = roid.getPosition().y;
-			    		  response.size = roid.size;
-			    		  response.rot = roid.rotation;
-			    		  response.id = i;
-			    		  connection.sendTCP(response);
+			    	  AsteroidResponse response = new AsteroidResponse();
+			    	  
+			    	  Iterator<Asteroid> roidIter = asteroids.values().iterator();
+			    	  while (roidIter.hasNext()) {
+			    		  Asteroid roid = roidIter.next();
+			    		  AsteroidPOJO pojo = new AsteroidPOJO();
+			    		  
+			    		  pojo.x = roid.getPosition().x;
+			    		  pojo.y = roid.getPosition().y;
+			    		  pojo.size = roid.size;
+			    		  pojo.rot = roid.rotation;
+			    		  pojo.id = roid.id;
+			    		  
+			    		 response.asteroids.add(pojo);
 			    	  }
+
+		    		  connection.sendTCP(response);
 			      }
 			      else if (object instanceof ShipRequest) {
 			    	  ShipRequest request = (ShipRequest)object;
@@ -154,22 +163,28 @@ public class AsteroidsServer extends BasicGame {
 			      }
 			      else if (object instanceof BulletRequest) {
 			    	  Iterator<Bullet> iter = bullets.values().iterator();
-			    	  
+
+		    		  BulletResponse response = new BulletResponse();
+		    		  
 			    	  while (iter.hasNext()) {
 			    		  Bullet bullet = iter.next();
-			    		  BulletResponse response = new BulletResponse();
-			    		  response.x = bullet.position.x;
-			    		  response.y = bullet.position.y;
-			    		  response.bulletId = bullet.id;
-			    		  response.playerId = bullet.getPlayerId();
-			    		  connection.sendTCP(response);
+			    		  BulletPOJO pojo = new BulletPOJO();
+			    		  
+			    		  pojo.x = bullet.position.x;
+			    		  pojo.y = bullet.position.y;
+			    		  pojo.bulletId = bullet.id;
+			    		  pojo.playerId = bullet.getPlayerId();
+			    		  
+			    		  response.bullets.add(pojo);
 			    	  }
+
+		    		  connection.sendTCP(response);
 			      }
 			   }
 			}); 
 		
 		for (int i = 0; i<6; i++) {
-			Asteroid roid = new Asteroid(Constants.ASTEROID_SIZE_BIGGEST);
+			Asteroid roid = new Asteroid(i, Constants.ASTEROID_SIZE_BIGGEST);
 			asteroids.put(i, roid);
 		}
 	}
@@ -177,16 +192,53 @@ public class AsteroidsServer extends BasicGame {
 	@Override
 	public void update(GameContainer container, int delta)
 			throws SlickException {
-		Iterator<Asteroid> asterIter = ((HashMap<Integer, Asteroid>) asteroids.clone()).values().iterator();
+		Iterator<Asteroid> asterIter = asteroids.values().iterator();
 		while (asterIter.hasNext()) {
 			Asteroid roid = asterIter.next();
 			roid.update(delta);
 		}
 		
-		Iterator<Bullet> bulletIter = ((HashMap<Integer, Bullet>) bullets.clone()).values().iterator();
+		Iterator<Bullet> bulletIter = bullets.values().iterator();
 		while (bulletIter.hasNext()) {
 			Bullet bullet = bulletIter.next();
 			bullet.update(delta);
+			if (bullet.toBeDestroyed) {
+				bulletIter.remove();
+			}
 		}
+		
+		EntityCollisions collisions = new EntityCollisions(Constants.CONTAINER_WIDTH, 
+														   Constants.CONTAINER_HEIGHT,
+														   Constants.COLLISION_CELL_SIZE);
+		ArrayList<Entity> entityList = new ArrayList<Entity>();
+		entityList.addAll(asteroids.values());
+		entityList.addAll(bullets.values());
+		entityList.addAll(ships.values());
+		collisions.detect(entityList);
+		
+		Iterator<Asteroid> roidIter = asteroids.values().iterator();
+		while (roidIter.hasNext()) {
+			Asteroid roid = roidIter.next();
+			if (roid.toBeDestroyed) {
+				if (roid.size == Constants.ASTEROID_SIZE_BIGGEST) {
+					for (int i = 0; i < 3; i++) {
+						Asteroid newRoid = new Asteroid(asteroids.size(), Constants.ASTEROID_SIZE_SMALLER, roid.position.x + roid.radius/2, roid.position.y + roid.radius/2);
+						while (asteroids.get(newRoid.id) != null) {
+							newRoid.id += 1;
+						}
+						asteroids.put(newRoid.id, newRoid);
+					}
+				} else if (roid.size == Constants.ASTEROID_SIZE_SMALLER) {
+					for (int i = 0; i < 6; i++) {
+						Asteroid newRoid = new Asteroid(asteroids.size(), Constants.ASTEROID_SIZE_SMALLEST, roid.position.x + roid.radius/2, roid.position.y + roid.radius/2);
+						while (asteroids.get(newRoid.id) != null) {
+							newRoid.id += 1;
+						}
+						asteroids.put(newRoid.id, newRoid);
+					}
+				}
+				roidIter.remove();
+			}
+		}		
 	}
 }

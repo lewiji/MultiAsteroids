@@ -53,15 +53,16 @@ public class Asteroid extends Entity {
 		shape = (Polygon) shape.transform(Transform.createRotateTransform(rotation));
 	}
 	
-	public Asteroid (float aSize, float x, float y) {
+	public Asteroid (int id, float aSize, float x, float y) {
 		this(aSize, x, y, 0, 0);
+		this.id = id;
 		Random rnd = new Random();
 		rotation = (float) (rnd.nextFloat() * Math.PI);
 		rotationVelocity = (float) (rnd.nextFloat() * Math.PI * rotationVelocity);
 	}
 	
-	public Asteroid (float aSize) {
-		this(aSize, 0, 0);
+	public Asteroid (int id, float aSize) {
+		this(id, aSize, 0, 0);
 		Random rnd = new Random();
 		position.x = (float) (rnd.nextFloat() * (Constants.CONTAINER_WIDTH - radius));
 		position.y = (float) (rnd.nextFloat() * (Constants.CONTAINER_HEIGHT - radius));
@@ -110,19 +111,7 @@ public class Asteroid extends Entity {
 	}
 
 	private void explode() {
-		if (size == Constants.ASTEROID_SIZE_BIGGEST) {
-			new Asteroid(Constants.ASTEROID_SIZE_SMALLER, position.x + radius/2, position.y + radius/2);
-			new Asteroid(Constants.ASTEROID_SIZE_SMALLER, position.x - radius/2, position.y - radius/2);
-			new Asteroid(Constants.ASTEROID_SIZE_SMALLER, position.x - radius/2, position.y + radius/2);
-			new Asteroid(Constants.ASTEROID_SIZE_SMALLER, position.x + radius/2, position.y - radius/2);
-		} else if (size == Constants.ASTEROID_SIZE_SMALLER) {
-			new Asteroid(Constants.ASTEROID_SIZE_SMALLEST, position.x + radius/2, position.y + radius/2);
-			new Asteroid(Constants.ASTEROID_SIZE_SMALLEST, position.x - radius/2, position.y - radius/2);
-			new Asteroid(Constants.ASTEROID_SIZE_SMALLEST, position.x - radius/2, position.y + radius/2);
-			new Asteroid(Constants.ASTEROID_SIZE_SMALLEST, position.x + radius/2, position.y + radius/2);
-			new Asteroid(Constants.ASTEROID_SIZE_SMALLEST, position.x - radius/2, position.y - radius/2);
-			new Asteroid(Constants.ASTEROID_SIZE_SMALLEST, position.x - radius/2, position.y + radius/2);
-		}
+		
 		toBeDestroyed = true;
 	}
 
