@@ -101,8 +101,7 @@ public class Ship extends Entity {
 	public void update(int delta) {
 		position.x = position.x - (thrust.x * delta);
 		position.y = position.y - (thrust.y * delta);
-		ship.setCenterX(position.x);
-		ship.setCenterY(position.y);
+		
 
 		
 		if (dead && deadTime > 0) {
@@ -176,6 +175,8 @@ public class Ship extends Entity {
 	
 	@Override
 	public void render(Graphics g) {
+		ship.setCenterX(position.x);
+		ship.setCenterY(position.y);
 		if (invulnerable) {
 			g.setColor(Color.green);
 			g.draw(ship);

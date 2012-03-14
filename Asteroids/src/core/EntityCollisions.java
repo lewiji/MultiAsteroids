@@ -28,9 +28,8 @@ public class EntityCollisions {
 		buckets = new HashMap<Integer, List<Entity>>(cols * rows);
 	}
 
-	public void detect() {
+	public void detect(ArrayList<Entity> entityList) {
 		clearBuckets();
-		ArrayList<Entity> entityList = (ArrayList<Entity>) Entity.getAllEntities();
 		
 		for (int i = 0; i < entityList.size(); i++) {
 			registerObject(entityList.get(i));
@@ -54,7 +53,7 @@ public class EntityCollisions {
 					if (otherEntity.toBeDestroyed) {
 						// remove other entity if it's marked as destroyed
 						nearbyEntitiesIterator.remove();
-						otherEntity.remove();
+						otherEntity = null;
 					}
 				}
 				if (entity.toBeDestroyed) {
@@ -65,7 +64,7 @@ public class EntityCollisions {
 			if (entity.toBeDestroyed) {
 				// Remove entity if destroyed, and break out of loop
 				entityIterator.remove();
-				entity.remove();
+				entity = null;
 				break;
 			}
 		}

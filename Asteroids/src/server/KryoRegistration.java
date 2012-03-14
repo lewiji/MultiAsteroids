@@ -41,5 +41,10 @@ public class KryoRegistration {
 		kryo.register(ArrayList.class);
 		kryo.register(Ship.class);
 		kryo.register(PlayerShipResponse.class);
+		kryo.register(ShipRequest.class);
+		kryo.register(ShipResponse.class);
+		kryo.register(BulletUpdate.class);
+		kryo.register(BulletResponse.class);
+		kryo.register(BulletRequest.class);
 	}
 }

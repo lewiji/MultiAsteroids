@@ -15,6 +15,7 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
+import com.esotericsoftware.minlog.Log;
 
 import core.Constants;
 import core.EntityCollisions;
@@ -25,8 +26,8 @@ import entities.Ship;
 public class AsteroidsServer extends BasicGame {
 	
 	HashMap<Integer, Asteroid> asteroids = new HashMap<Integer, Asteroid>();
-	ArrayList<Ship> ships = new ArrayList<Ship>();
-	ArrayList<Bullet> bullets = new ArrayList<Bullet>();
+	HashMap<Integer, Ship> ships = new HashMap<Integer, Ship>();
+	HashMap<Integer, Bullet> bullets = new HashMap<Integer, Bullet>();
 
 	public AsteroidsServer() {
 		super("AsteroidsServer");
@@ -55,7 +56,23 @@ public class AsteroidsServer extends BasicGame {
 	@Override
 	public void render(GameContainer container, Graphics g)
 			throws SlickException {
-		// TODO Auto-generated method stub
+		Iterator<Asteroid> asterIter = ((HashMap<Integer, Asteroid>) asteroids.clone()).values().iterator();
+		while (asterIter.hasNext()) {
+			Asteroid roid = asterIter.next();
+			roid.render(g);
+		}
+		
+		Iterator<Ship> shipIter = ((HashMap<Integer, Ship>) ships.clone()).values().iterator();
+		while (shipIter.hasNext()) {
+			Ship ship = shipIter.next();
+			ship.render(g);
+		}
+		
+		Iterator<Bullet> bulletIter = ((HashMap<Integer, Bullet>) bullets.clone()).values().iterator();
+		while (bulletIter.hasNext()) {
+			Bullet bullet = bulletIter.next();
+			bullet.render(g);
+		}
 		
 	}
 
@@ -70,6 +87,7 @@ public class AsteroidsServer extends BasicGame {
 		}
 		
 		Kryo kryo = server.getKryo();
+		Log.set(Log.LEVEL_DEBUG);
 		
 		KryoRegistration.register(kryo);
 		
@@ -83,7 +101,7 @@ public class AsteroidsServer extends BasicGame {
 			         response.setPlayerId(ships.size());
 			         Ship ship = new Ship();
 			         ship.playerId = response.getPlayerId();
-			         ships.add(ship);
+			         ships.put(response.getPlayerId(), ship);
 			         connection.sendTCP(response);
 			      }
 			      else if (object instanceof AsteroidRequest) {
@@ -95,6 +113,55 @@ public class AsteroidsServer extends BasicGame {
 			    		  response.size = roid.size;
 			    		  response.rot = roid.rotation;
 			    		  response.id = i;
+			    		  connection.sendTCP(response);
+			    	  }
+			      }
+			      else if (object instanceof ShipRequest) {
+			    	  ShipRequest request = (ShipRequest)object;
+			    	  Ship ship = ships.get(request.playerId);
+			    	  if (ship != null) {
+			    		  ships.remove(request.playerId);
+			    	  }
+			    	  Ship newShip = new Ship();
+						newShip.position.x = request.x;
+						newShip.position.y = request.y;
+						newShip.rotation = request.rot;
+						newShip.playerId = request.playerId;
+						ships.put(request.playerId, newShip);
+						
+						Iterator<Ship> iter = ships.values().iterator();
+						
+						while (iter.hasNext()) {
+							Ship aShip = iter.next();
+							if (aShip.getPlayerId() != request.playerId) {
+								ShipResponse response = new ShipResponse();
+								response.playerId = aShip.playerId;
+								response.rot = aShip.rotation;
+								response.x = aShip.position.x;
+								response.y = aShip.position.y;
+								connection.sendTCP(response);
+							}
+						}
+			      }
+			      else if (object instanceof BulletUpdate) {
+			    	  BulletUpdate request = (BulletUpdate)object;
+			    	  Bullet bullet = new Bullet(request.angle, request.x, request.y, request.playerId);
+			    	  bullet.id = bullets.size();
+			    	  while (bullets.get(bullet.id) != null) {
+			    		  bullet.id += 1;
+			    	  }
+			    	  bullets.put(bullet.id, bullet);
+			      }
+			      else if (object instanceof BulletRequest) {
+			    	  Iterator<Bullet> iter = bullets.values().iterator();
+			    	  
+			    	  while (iter.hasNext()) {
+			    		  Bullet bullet = iter.next();
+			    		  BulletResponse response = new BulletResponse();
+			    		  response.x = bullet.position.x;
+			    		  response.y = bullet.position.y;
+			    		  response.bulletId = bullet.id;
+			    		  response.playerId = bullet.getPlayerId();
 			    		  connection.sendTCP(response);
 			    	  }
 			      }
@@ -110,10 +177,16 @@ public class AsteroidsServer extends BasicGame {
 	@Override
 	public void update(GameContainer container, int delta)
 			throws SlickException {
-		
-		for (int i = 0; i < asteroids.size(); i++) {
-			asteroids.get(i).update(delta);
+		Iterator<Asteroid> asterIter = ((HashMap<Integer, Asteroid>) asteroids.clone()).values().iterator();
+		while (asterIter.hasNext()) {
+			Asteroid roid = asterIter.next();
+			roid.update(delta);
 		}
 		
+		Iterator<Bullet> bulletIter = ((HashMap<Integer, Bullet>) bullets.clone()).values().iterator();
+		while (bulletIter.hasNext()) {
+			Bullet bullet = bulletIter.next();
+			bullet.update(delta);
+		}
 	}
 }

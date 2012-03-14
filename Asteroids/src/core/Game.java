@@ -17,10 +17,14 @@ import org.newdawn.slick.SlickException;
 
 import server.AsteroidRequest;
 import server.AsteroidResponse;
+import server.BulletRequest;
+import server.BulletResponse;
+import server.BulletUpdate;
 import server.ConnectionRequest;
 import server.ConnectionResponse;
 import server.KryoRegistration;
-import server.PlayerShipRequest;
+import server.ShipRequest;
+import server.ShipResponse;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Client;
@@ -40,11 +44,9 @@ public class Game extends BasicGame {
 	
 	Client client;	
 	
-	HashMap<Integer, Asteroid> asteroids = new HashMap<Integer, Asteroid>();
-	ArrayList<Ship> ships = new ArrayList<Ship>();
-	ArrayList<Bullet> bullets = new ArrayList<Bullet>();
-	
-	boolean rendering = false;
+	public static HashMap<Integer, Asteroid> asteroids = new HashMap<Integer, Asteroid>();
+	public static HashMap<Integer, Ship> ships = new HashMap<Integer, Ship>();
+	public static HashMap<Integer, Bullet> bullets = new HashMap<Integer, Bullet>();
 	
 	public Game() {
 		super("Asteroids");
@@ -53,21 +55,26 @@ public class Game extends BasicGame {
 	@Override
 	public void render(GameContainer container, Graphics g)
 			throws SlickException {
-		
-		HashMap<Integer, Asteroid> asteroidsCopy = (HashMap<Integer, Asteroid>) asteroids.clone();
-
-		for (int i = 0; i < asteroids.size(); i++) {
-			Asteroid entity = asteroids.get(i);
-			entity.render(g);
+		Iterator<Asteroid> asterIter = ((HashMap<Integer, Asteroid>) asteroids.clone()).values().iterator();
+		while (asterIter.hasNext()) {
+			Asteroid roid = asterIter.next();
+			roid.render(g);
 		}
 		
-		/*Iterator<Ship> shipIter = ships.iterator();
-
+		Iterator<Ship> shipIter = ((HashMap<Integer, Ship>) ships.clone()).values().iterator();
 		while (shipIter.hasNext()) {
-			Ship entity = shipIter.next();
-			entity.render(g);
+			Ship ship = shipIter.next();
+			ship.render(g);
 		}
 		
+		Iterator<Bullet> bulletIter = ((HashMap<Integer, Bullet>) bullets.clone()).values().iterator();
+		while (bulletIter.hasNext()) {
+			Bullet bullet = bulletIter.next();
+			bullet.render(g);
+		}
+		
+		playerShip.render(g);
+		/*
 		Iterator<Bullet> bulletIter = bullets.iterator();
 
 		while (bulletIter.hasNext()) {
@@ -107,18 +114,35 @@ public class Game extends BasicGame {
 				}
 				else if (object instanceof AsteroidResponse) {
 					AsteroidResponse response = (AsteroidResponse)object;
-					Asteroid roid = asteroids.get(response.id);
+					Asteroid roid = Game.asteroids.get(response.id);
 					if (roid != null) {
-						roid.position.x = response.x;
-						roid.position.y = response.y;
-						roid.rotation = response.rot;
-						roid.size = response.size;
-					} else {
-						Asteroid newRoid = new Asteroid(response.size, response.x, response.y);
-						newRoid.rotation = response.rot;
-						asteroids.put(response.id, newRoid);
-					}
+						asteroids.remove(roid);
+					} 
+					Asteroid newRoid = new Asteroid(response.size, response.x, response.y);
+					newRoid.rotation = response.rot;
+					asteroids.put(response.id, newRoid);
 					
+				}
+				else if (object instanceof ShipResponse) {
+					ShipResponse response = (ShipResponse)object;
+					Ship ship = Game.ships.get(response.playerId);
+					if (ship != null) {
+						asteroids.remove(ship);
+					}
+					Ship newShip = new Ship();
+					newShip.position.x = response.x;
+					newShip.position.y = response.y;
+					newShip.rotation = response.rot;
+					ships.put(response.playerId, newShip);
+				}
+				else if (object instanceof BulletResponse) {
+					BulletResponse response = (BulletResponse)object;
+					Bullet bullet = bullets.get(response.bulletId);
+					if (bullet != null) {
+						bullets.remove(bullet);
+					}
+					Bullet newBullet = new Bullet(0, response.x, response.y, response.playerId);
+					bullets.put(response.bulletId, newBullet);
 				}
 		   }
 		});
@@ -129,12 +153,13 @@ public class Game extends BasicGame {
 			throws SlickException {
 		Input input = container.getInput();
 		
-		//updatePlayerShip(container, delta, input);		
-		/*updateBullets(container, delta);
-		detectCollisions();*/
+		
+		//updateBullets(container, delta);
+		//detectCollisions();
 		
 		updateAsteroids();
-		
+		updatePlayerShip(container, delta, input);
+		client.sendTCP(new BulletRequest());
 	}
 	
 	private void updateAsteroids() {
@@ -174,7 +199,12 @@ public class Game extends BasicGame {
 		} 
 		
 		if (input.isMousePressed(Input.MOUSE_RIGHT_BUTTON)) {
-			new Bullet(playerShip.getAngle(), playerShip.getPosition().x, playerShip.getPosition().y, playerShip.getPlayerId());
+			BulletUpdate request = new BulletUpdate();
+			request.angle = playerShip.getAngle();
+			request.x = playerShip.getPosition().x;
+			request.y = playerShip.getPosition().y;
+			request.playerId = playerShip.playerId;
+			client.sendTCP(request);
 		}
 		
 		if (playerShip.getPosition().x > container.getWidth()) {
@@ -193,8 +223,11 @@ public class Game extends BasicGame {
 			playerShip.setY(container.getHeight());
 		}
 		
-		PlayerShipRequest shipRequest = new PlayerShipRequest();
-		shipRequest.ship = playerShip;
+		ShipRequest shipRequest = new ShipRequest();
+		shipRequest.playerId = playerShip.playerId;
+		shipRequest.x = playerShip.position.x;
+		shipRequest.y = playerShip.position.y;
+		shipRequest.rot = playerShip.rotation;
 		client.sendTCP(shipRequest);
 	}
 
