@@ -63,7 +63,9 @@ public class Bullet extends Entity {
 
 	@Override
 	public void handleCollision(Ship shipOther) {
-		this.toBeDestroyed = true;
+		if (shipOther.playerId != this.playerId) {
+			this.toBeDestroyed = true;
+		}
 	}
 	
 	@Override
