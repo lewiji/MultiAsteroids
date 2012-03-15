@@ -13,6 +13,7 @@ import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.BasicGame;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.Sound;
@@ -44,6 +45,8 @@ public class Game extends BasicGame {
 	public static Sound asteroidExplosionFx = null;
 	public static Sound thrustFx = null;
 	
+	private Image background = null;
+	
 	public static ConcurrentHashMap<Integer, Asteroid> asteroids = new ConcurrentHashMap<Integer, Asteroid>();
 	public static ConcurrentHashMap<Integer, Ship> ships = new ConcurrentHashMap<Integer, Ship>();
 	public static ConcurrentHashMap<Integer, Bullet> bullets = new ConcurrentHashMap<Integer, Bullet>();
@@ -55,7 +58,7 @@ public class Game extends BasicGame {
 	@Override
 	public void render(GameContainer container, Graphics g)
 			throws SlickException {
-		
+		background.draw(0,0);
 		
 		Iterator<Bullet> bulletIter = bullets.values().iterator();
 		while (bulletIter.hasNext()) {
@@ -75,8 +78,6 @@ public class Game extends BasicGame {
 			roid.render(g);
 		}
 		
-		
-		
 		playerShip.render(g);
 	}
 
@@ -89,6 +90,7 @@ public class Game extends BasicGame {
 			explosionFx = new Sound("resources/sound/Explosion4.wav");
 			asteroidExplosionFx = new Sound("resources/sound/Explosion9.wav");
 			thrustFx = new Sound("resources/sound/Thrust.wav");
+			background = new Image("resources/img/background.jpg");
 		} catch (SlickException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
