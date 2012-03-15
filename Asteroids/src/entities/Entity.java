@@ -48,12 +48,6 @@ public abstract class Entity {
 	public abstract void handleCollision(Ship shipOther);
 
 	public boolean collidesWith(Entity entity) {
-		if (entity.getImage() == null) {
-			entity.loadImage();
-		}
-		if (this.getImage() == null) {
-			this.loadImage();
-		}
 		return (((entity.position.x + entity.getImage().getWidth()) >= this.position.x) &&
 			 (entity.position.x <= (this.position.x + this.getImage().getWidth())) && 
 			 ((entity.position.y + entity.getImage().getHeight()) > this.position.y) &&

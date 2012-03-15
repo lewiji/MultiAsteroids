@@ -75,9 +75,6 @@ public class Ship extends Entity {
 
 	@Override
 	public void update(int delta) {
-		if (ship == null) {
-			loadImage();
-		}
 		position.x = position.x - (thrust.x * delta);
 		position.y = position.y - (thrust.y * delta);
 		
@@ -111,6 +108,9 @@ public class Ship extends Entity {
 
 	@Override
 	public Image getImage() {
+		if (ship == null) {
+			loadImage();
+		}
 		return ship;
 	}
 
@@ -161,14 +161,11 @@ public class Ship extends Entity {
 	
 	@Override
 	public void render(Graphics g) {
-		if (ship == null) {
-			loadImage();
-		}
-		ship.setRotation((float) Math.toDegrees(rotation));
+		getImage().setRotation((float) Math.toDegrees(rotation));
 		if (invulnerable) {
-			ship.draw(position.x, position.y);
+			getImage().draw(position.x, position.y);
 		} else {
-			ship.draw(position.x, position.y);
+			getImage().draw(position.x, position.y);
 		}
 	}
 

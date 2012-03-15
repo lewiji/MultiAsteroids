@@ -56,9 +56,6 @@ public class Asteroid extends Entity {
 
 	@Override
 	public void update(int delta) {
-		if (sprite == null) {
-			loadImage();
-		}
 		position.x = (float) (position.x - Math.sin(rotation) * velocity * delta);
 		position.y = (float) (position.y - -Math.cos(rotation) * velocity * delta);
 		
@@ -82,6 +79,9 @@ public class Asteroid extends Entity {
 
 	@Override
 	public Image getImage() {
+		if (sprite == null) {
+			loadImage();
+		}
 		return sprite;
 	}
 
@@ -114,10 +114,7 @@ public class Asteroid extends Entity {
 
 	@Override
 	public void render(Graphics g) {
-		if (sprite == null) {
-			loadImage();
-		}
-		sprite.draw(position.x, position.y);
+		getImage().draw(position.x, position.y);
 	}
 
 	@Override

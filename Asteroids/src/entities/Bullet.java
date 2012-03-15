@@ -21,9 +21,6 @@ public class Bullet extends Entity {
 	}
 	
 	public void update(int delta) {
-		if (sprite == null) {
-			loadImage();
-		}
 		position.x = (float) (position.x - Math.sin(rotation) * velocity * delta);
 		position.y = (float) (position.y - -Math.cos(rotation) * velocity * delta);
 		
@@ -37,13 +34,15 @@ public class Bullet extends Entity {
 
 	@Override
 	public Image getImage() {
+		if (sprite == null) {
+			loadImage();
+		}
 		return sprite;
 	}
 
 	@Override
 	public void goneOffScreen() {
-		// TODO Auto-generated method stub
-		
+		toBeDestroyed = true;
 	}
 	
 	public int getPlayerId() {
@@ -64,17 +63,12 @@ public class Bullet extends Entity {
 
 	@Override
 	public void handleCollision(Ship shipOther) {
-		//BulletFactory.removeBullet(this);
-		
+		this.toBeDestroyed = true;
 	}
 	
 	@Override
 	public void render(Graphics g) {
-		if (sprite == null) {
-			loadImage();
-		}
-		sprite.draw(position.x, position.y);
-		
+		getImage().draw(position.x, position.y);
 	}
 
 	@Override
