@@ -8,9 +8,14 @@ import java.util.List;
 import org.newdawn.slick.geom.Vector2f;
 
 import entities.Entity;
+import entities.Ship;
 
 public class EntityCollisions {
-	// Implementation of spatial hashing
+	/* Implementation of spatial hashing
+	 * The window is split into cells, say, 8x6. Each cell is a 'bucket' of entities.
+	 * When detecting collisions, each entity is put into one or more 'buckets' that it overlaps.
+	 * Collisions are then only checked against entities that are in the same buckets.
+	 */
 	int width;
 	int height;
 	int cellSize;
@@ -45,11 +50,11 @@ public class EntityCollisions {
 				Entity otherEntity = nearbyEntitiesIterator.next();
 				
 				if (!otherEntity.equals(entity) &&						
-						otherEntity.getDrawable().intersects(entity.getDrawable())) {
+						otherEntity.collidesWith(entity)) {
 					// Deal with collisions (individual classes have collision logic)
 					entity.handleCollision(otherEntity);
 					otherEntity.handleCollision(entity);
-					System.out.println("Collision");
+					
 				}
 			}
 		}

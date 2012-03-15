@@ -171,6 +171,7 @@ public class Ship extends Entity {
 	
 	public void killShip() {
 		dead = true;
+		toBeDestroyed = true;
 	}
 	
 	@Override

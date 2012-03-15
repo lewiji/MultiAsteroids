@@ -132,8 +132,8 @@ public class AsteroidsServer extends BasicGame {
 			    		  if (ship.toBeDestroyed) {
 			    			  ShipDestroyResponse shipDestroy = new ShipDestroyResponse();
 			    			  connection.sendTCP(shipDestroy);
+			    			  ship.toBeDestroyed = false;
 			    		  }
-			    		  ships.remove(request.playerId);
 			    	  }
 			    	  Ship newShip = new Ship();
 						newShip.position.x = request.x;
@@ -211,6 +211,13 @@ public class AsteroidsServer extends BasicGame {
 			if (bullet.toBeDestroyed) {
 				bulletIter.remove();
 			}
+		}
+		
+		Iterator<Ship> shipIter = ships.values().iterator();
+		while (shipIter.hasNext()) {
+			Ship ship = shipIter.next();
+			ship.update(delta);
+			
 		}
 		
 		EntityCollisions collisions = new EntityCollisions(Constants.CONTAINER_WIDTH, 

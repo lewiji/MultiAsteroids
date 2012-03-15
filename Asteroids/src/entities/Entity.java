@@ -50,4 +50,11 @@ public abstract class Entity {
 	public abstract void handleCollision(Bullet bulletOther);
 	
 	public abstract void handleCollision(Ship shipOther);
+
+	public boolean collidesWith(Entity entity) {
+		return (((entity.position.x + entity.radius) > this.position.x) &&
+			 (entity.position.x < this.position.x + this.radius) && 
+			 ((entity.position.y + entity.radius) > this.position.y) &&
+			 (entity.position.y < this.position.y + this.radius));
+	}
 }
