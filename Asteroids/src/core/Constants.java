@@ -1,7 +1,5 @@
 package core;
 
-import org.newdawn.slick.Image;
-import org.newdawn.slick.SpriteSheet;
 
 public class Constants {
 	public static final int CONTAINER_WIDTH = 1024;

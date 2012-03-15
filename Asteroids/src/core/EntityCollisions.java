@@ -8,7 +8,6 @@ import java.util.List;
 import org.newdawn.slick.geom.Vector2f;
 
 import entities.Entity;
-import entities.Ship;
 
 public class EntityCollisions {
 	/* Implementation of spatial hashing
@@ -82,8 +81,8 @@ public class EntityCollisions {
 		
 		Vector2f min = new Vector2f(entity.getPosition().x, 
 								  	entity.getPosition().y);
-		Vector2f max = new Vector2f(entity.getPosition().x + entity.getRadius(), 
-				  					entity.getPosition().y + entity.getRadius());
+		Vector2f max = new Vector2f(entity.getPosition().x + entity.getImage().getWidth(), 
+				  					entity.getPosition().y + entity.getImage().getHeight());
 		
 		int topLeft = addBucket(min);
 		if (topLeft > 0 && topLeft < buckets.size() - 1 && !bucketsObjIsIn.contains(topLeft)) {

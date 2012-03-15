@@ -6,7 +6,6 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.geom.Vector2f;
-import org.newdawn.slick.loading.LoadingList;
 
 import core.Constants;
 
@@ -182,7 +181,7 @@ public class Ship extends Entity {
 			e.printStackTrace();
 		}  
 		try {
-			ship.setFilter(ship.FILTER_NEAREST);
+			ship.setFilter(Image.FILTER_NEAREST);
 		} catch (SlickException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

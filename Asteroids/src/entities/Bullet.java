@@ -3,7 +3,6 @@ package entities;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
-import org.newdawn.slick.loading.LoadingList;
 
 import core.Constants;
 
@@ -87,7 +86,7 @@ public class Bullet extends Entity {
 			e.printStackTrace();
 		}
 		try {
-			sprite.setFilter(sprite.FILTER_NEAREST);
+			sprite.setFilter(Image.FILTER_NEAREST);
 		} catch (SlickException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

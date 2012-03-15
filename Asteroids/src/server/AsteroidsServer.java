@@ -2,7 +2,6 @@ package server;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -33,7 +32,6 @@ public class AsteroidsServer extends BasicGame {
 
 	public AsteroidsServer() {
 		super("AsteroidsServer");
-		// TODO Auto-generated constructor stub
 	}
 	
 	public static void main(String[] args) {
@@ -87,7 +85,6 @@ public class AsteroidsServer extends BasicGame {
 			server.start();
 			server.bind(2112, 2113);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -99,9 +96,7 @@ public class AsteroidsServer extends BasicGame {
 		server.addListener(new Listener() {
 			   public void received (Connection connection, Object object) {
 			      if (object instanceof ConnectionRequest) {
-			         ConnectionRequest request = (ConnectionRequest)object;
-			         System.out.println("Connection request received");
-			         
+			         Log.info("Connection request received");
 			         ConnectionResponse response = new ConnectionResponse();
 			         response.setPlayerId(connection.getID());
 			         Ship ship = new Ship();

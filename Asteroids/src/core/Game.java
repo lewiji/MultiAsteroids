@@ -17,25 +17,15 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.Sound;
 
-import server.AsteroidDestroyResponse;
-import server.AsteroidPOJO;
 import server.AsteroidRequest;
-import server.AsteroidResponse;
-import server.BulletPOJO;
 import server.BulletRequest;
-import server.BulletResponse;
 import server.BulletUpdate;
 import server.ConnectionRequest;
-import server.ConnectionResponse;
 import server.KryoRegistration;
-import server.ShipDestroyResponse;
 import server.ShipRequest;
-import server.ShipResponse;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Client;
-import com.esotericsoftware.kryonet.Connection;
-import com.esotericsoftware.kryonet.Listener;
 
 import entities.Asteroid;
 import entities.Bullet;
@@ -46,13 +36,13 @@ import entities.Ship;
  *
  */
 public class Game extends BasicGame {
-	Ship playerShip;
+	public static Ship playerShip;
 	
-	Client client;
-	Sound laserFx = null;
-	Sound explosionFx = null;
-	Sound asteroidExplosionFx = null;
-	Sound thrustFx = null;
+	public static Client client;
+	public static Sound laserFx = null;
+	public static Sound explosionFx = null;
+	public static Sound asteroidExplosionFx = null;
+	public static Sound thrustFx = null;
 	
 	public static ConcurrentHashMap<Integer, Asteroid> asteroids = new ConcurrentHashMap<Integer, Asteroid>();
 	public static ConcurrentHashMap<Integer, Ship> ships = new ConcurrentHashMap<Integer, Ship>();
@@ -88,24 +78,6 @@ public class Game extends BasicGame {
 		
 		
 		playerShip.render(g);
-		
-		/*Font font = new Font("Verdana", Font.PLAIN, 40);
-		UnicodeFont tfont = new UnicodeFont(font , 20, false, false);
-		tfont.getEffects().add(new ColorEffect(java.awt.Color.WHITE));
-	    tfont.addAsciiGlyphs();
-	    tfont.addGlyphs(400, 600);
-	    tfont.loadGlyphs();
-	    tfont.drawString(0,0, "hello", Color.white);*/
-		
-		
-		
-		/*
-		Iterator<Bullet> bulletIter = bullets.iterator();
-
-		while (bulletIter.hasNext()) {
-			Bullet entity = bulletIter.next();
-			entity.render(g);
-		}*/
 	}
 
 	@Override
@@ -129,12 +101,12 @@ public class Game extends BasicGame {
 		client = new Client();
 		client.start();
 		while (!client.isConnected()) {
-			String address = JOptionPane.showInputDialog(null,
-					  "Enter an IP Address:",
-					  "Connection",
-					  JOptionPane.QUESTION_MESSAGE);
-			
 			try {
+				String address = JOptionPane.showInputDialog(null,
+						  "Enter an IP Address:",
+						  "Connection",
+						  JOptionPane.QUESTION_MESSAGE);
+			
 				client.connect(5000, address, 2112, 2113);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -145,68 +117,13 @@ public class Game extends BasicGame {
 		
 		ConnectionRequest connectionRequest = new ConnectionRequest();
 		client.sendTCP(connectionRequest);
-		
-		client.addListener(new Listener() {
-			public void received (Connection connection, Object object) {
-
-				if (object instanceof ConnectionResponse) {
-			         ConnectionResponse response = (ConnectionResponse)object;
-			         System.out.println(response.getPlayerId());
-			         playerShip.playerId = response.getPlayerId();
-				}
-				else if (object instanceof AsteroidResponse) {
-					AsteroidResponse response = (AsteroidResponse)object;
-					Iterator<AsteroidPOJO> iter = response.asteroids.iterator();
-					while (iter.hasNext()) {
-						AsteroidPOJO pojo = iter.next();
-						Asteroid asteroid = asteroids.get(pojo.id);
-						if (asteroid != null) {
-							asteroids.remove(asteroid);
-						}
-						asteroids.put(pojo.id, new Asteroid(pojo.id, pojo.size, pojo.x, pojo.y));
-					}
-				}
-				else if (object instanceof AsteroidDestroyResponse) {
-					AsteroidDestroyResponse response = (AsteroidDestroyResponse)object;
-					asteroids.remove(response.id);
-					asteroidExplosionFx.play();
-				}
-				else if (object instanceof ShipResponse) {
-					ShipResponse response = (ShipResponse)object;
-					Ship ship = Game.ships.get(response.playerId);
-					if (ship != null) {
-						ships.remove(ship);
-					}
-					Ship newShip = new Ship();
-					newShip.position.x = response.x;
-					newShip.position.y = response.y;
-					newShip.rotation = response.rot;
-					ships.put(response.playerId, newShip);
-				}
-				else if (object instanceof ShipDestroyResponse) {
-					playerShip.killShip();
-					explosionFx.play();
-				}
-				else if (object instanceof BulletResponse) {
-					BulletResponse response = (BulletResponse)object;
-					bullets.clear();
-					
-					Iterator<BulletPOJO> iter = response.bullets.iterator();
-					while (iter.hasNext()) {
-						BulletPOJO next = iter.next();
-						Bullet bullet = new Bullet(0, next.x, next.y, next.playerId);
-						bullets.put(next.bulletId, bullet);
-					}
-				}
-		   }
-		});
+		client.addListener(new NetworkListener());
 	}
 
 	@Override
 	public void update(GameContainer container, int delta)
 			throws SlickException {
 		Input input = container.getInput();
-		
 		updateAsteroids();
 		updatePlayerShip(container, delta, input);
 		client.sendTCP(new BulletRequest());
@@ -260,6 +177,7 @@ public class Game extends BasicGame {
 		shipRequest.y = playerShip.position.y;
 		shipRequest.rot = playerShip.rotation;
 		shipRequest.invulnerable = playerShip.invulnerable;
+		
 		client.sendTCP(shipRequest);
 	}
 
