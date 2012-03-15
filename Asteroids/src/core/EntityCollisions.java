@@ -80,8 +80,8 @@ public class EntityCollisions {
 	private ArrayList<Integer> getIdForObj(Entity entity) {
 		ArrayList<Integer> bucketsObjIsIn = new ArrayList<Integer>();
 		
-		Vector2f min = new Vector2f(entity.getPosition().x - entity.getRadius(), 
-								  	entity.getPosition().y - entity.getRadius());
+		Vector2f min = new Vector2f(entity.getPosition().x, 
+								  	entity.getPosition().y);
 		Vector2f max = new Vector2f(entity.getPosition().x + entity.getRadius(), 
 				  					entity.getPosition().y + entity.getRadius());
 		

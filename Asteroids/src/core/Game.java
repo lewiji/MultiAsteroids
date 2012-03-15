@@ -52,6 +52,7 @@ public class Game extends BasicGame {
 	Sound laserFx = null;
 	Sound explosionFx = null;
 	Sound asteroidExplosionFx = null;
+	Sound thrustFx = null;
 	
 	public static ConcurrentHashMap<Integer, Asteroid> asteroids = new ConcurrentHashMap<Integer, Asteroid>();
 	public static ConcurrentHashMap<Integer, Ship> ships = new ConcurrentHashMap<Integer, Ship>();
@@ -115,6 +116,7 @@ public class Game extends BasicGame {
 			laserFx = new Sound("resources/sound/Laser_Shoot2.wav");
 			explosionFx = new Sound("resources/sound/Explosion4.wav");
 			asteroidExplosionFx = new Sound("resources/sound/Explosion9.wav");
+			thrustFx = new Sound("resources/sound/Thrust.wav");
 		} catch (SlickException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -222,6 +224,7 @@ public class Game extends BasicGame {
 		
 		if (input.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON)) {
 			playerShip.thrust();
+			thrustFx.play();
 		} 
 		
 		if (input.isMousePressed(Input.MOUSE_RIGHT_BUTTON)) {
