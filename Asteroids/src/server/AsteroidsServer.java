@@ -49,7 +49,7 @@ public class AsteroidsServer extends BasicGame {
 
 	}
 
-	public Server server = new Server(32768, 4096);
+	public Server server = new Server();
 	
 	EntityCollisions collisions = new EntityCollisions(Constants.CONTAINER_WIDTH, 
 			   Constants.CONTAINER_HEIGHT, 
@@ -103,7 +103,7 @@ public class AsteroidsServer extends BasicGame {
 			         System.out.println("Connection request received");
 			         
 			         ConnectionResponse response = new ConnectionResponse();
-			         response.setPlayerId(ships.size());
+			         response.setPlayerId(connection.getID());
 			         Ship ship = new Ship();
 			         ship.playerId = response.getPlayerId();
 			         ships.put(response.getPlayerId(), ship);
@@ -199,6 +199,9 @@ public class AsteroidsServer extends BasicGame {
 		    		  connection.sendTCP(response);
 			      }
 			   }
+			   public void disconnected (Connection connection) {
+				   ships.remove(connection.getID());
+			   }
 			}); 
 		
 		for (int i = 0; i<6; i++) {
@@ -244,7 +247,7 @@ public class AsteroidsServer extends BasicGame {
 		Iterator<Asteroid> roidIter = asteroids.values().iterator();
 		while (roidIter.hasNext()) {
 			Asteroid roid = roidIter.next();
-			if (roid.toBeDestroyed) {
+			if (roid.toBeDestroyed && !roid.exploded) {
 				
 				// Explode asteroid into smaller pieces
 				if (roid.size == Constants.ASTEROID_SIZE_BIGGEST) {
@@ -256,7 +259,7 @@ public class AsteroidsServer extends BasicGame {
 						asteroids.put(newRoid.id, newRoid);
 					}
 				} else if (roid.size == Constants.ASTEROID_SIZE_SMALLER) {
-					for (int i = 0; i < 4; i++) {
+					for (int i = 0; i < 6; i++) {
 						Asteroid newRoid = new Asteroid(asteroids.size(), Constants.ASTEROID_SIZE_SMALLEST, roid.position.x + roid.radius/2, roid.position.y + roid.radius/2);
 						while (asteroids.get(newRoid.id) != null) {
 							newRoid.id += 1;
@@ -264,6 +267,7 @@ public class AsteroidsServer extends BasicGame {
 						asteroids.put(newRoid.id, newRoid);
 					}
 				}
+				roid.exploded = true;
 			}
 		}		
 	}

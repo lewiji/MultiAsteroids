@@ -15,6 +15,7 @@ public class Asteroid extends Entity {
 	private float rotationVelocity = 0.01f;
 	private Image sprite;
 	public float size;
+	public boolean exploded = false;
 	
 	public Asteroid() {
 		
@@ -78,7 +79,6 @@ public class Asteroid extends Entity {
 			position.y = Constants.CONTAINER_HEIGHT + radius;
 		}
 		
-		sprite.rotate(rotationVelocity);
 	}
 
 	@Override
@@ -143,7 +143,7 @@ public class Asteroid extends Entity {
 			e.printStackTrace();
 		}
 		
-		radius = sprite.getHeight();
+		radius = sprite.getWidth();
 		sprite.setRotation(rotation);
 	}
 

@@ -15,6 +15,7 @@ import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
+import org.newdawn.slick.Sound;
 
 import server.AsteroidDestroyResponse;
 import server.AsteroidPOJO;
@@ -47,7 +48,10 @@ import entities.Ship;
 public class Game extends BasicGame {
 	Ship playerShip;
 	
-	Client client;	
+	Client client;
+	Sound laserFx = null;
+	Sound explosionFx = null;
+	Sound asteroidExplosionFx = null;
 	
 	public static ConcurrentHashMap<Integer, Asteroid> asteroids = new ConcurrentHashMap<Integer, Asteroid>();
 	public static ConcurrentHashMap<Integer, Ship> ships = new ConcurrentHashMap<Integer, Ship>();
@@ -103,11 +107,20 @@ public class Game extends BasicGame {
 	public void init(GameContainer container) throws SlickException {
 		playerShip = new Ship();
 		
+		try {
+			laserFx = new Sound("resources/sound/Laser_Shoot2.wav");
+			explosionFx = new Sound("resources/sound/Explosion4.wav");
+			asteroidExplosionFx = new Sound("resources/sound/Explosion9.wav");
+		} catch (SlickException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		connectToServer();
 	}
 
 	private void connectToServer() {
-		client = new Client(16384, 4096);
+		client = new Client();
 		client.start();
 		while (!client.isConnected()) {
 			String address = JOptionPane.showInputDialog(null,
@@ -150,6 +163,7 @@ public class Game extends BasicGame {
 				else if (object instanceof AsteroidDestroyResponse) {
 					AsteroidDestroyResponse response = (AsteroidDestroyResponse)object;
 					asteroids.remove(response.id);
+					asteroidExplosionFx.play();
 				}
 				else if (object instanceof ShipResponse) {
 					ShipResponse response = (ShipResponse)object;
@@ -165,6 +179,7 @@ public class Game extends BasicGame {
 				}
 				else if (object instanceof ShipDestroyResponse) {
 					playerShip.killShip();
+					explosionFx.play();
 				}
 				else if (object instanceof BulletResponse) {
 					BulletResponse response = (BulletResponse)object;
@@ -212,6 +227,8 @@ public class Game extends BasicGame {
 			request.y = playerShip.getPosition().y;
 			request.playerId = playerShip.playerId;
 			client.sendTCP(request);
+			
+			laserFx.play();
 		}
 		
 		if (playerShip.getPosition().x > container.getWidth()) {
