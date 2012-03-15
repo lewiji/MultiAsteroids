@@ -3,16 +3,20 @@
  */
 package core;
 
+import java.awt.Font;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.BasicGame;
+import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
+import org.newdawn.slick.UnicodeFont;
+import org.newdawn.slick.font.effects.ColorEffect;
 
 import server.AsteroidDestroyResponse;
 import server.AsteroidPOJO;
@@ -77,6 +81,17 @@ public class Game extends BasicGame {
 		}
 		
 		playerShip.render(g);
+		
+		Font font = new Font("Verdana", Font.PLAIN, 40);
+		UnicodeFont tfont = new UnicodeFont(font , 20, false, false);
+		tfont.getEffects().add(new ColorEffect(java.awt.Color.WHITE));
+	    tfont.addAsciiGlyphs();
+	    tfont.addGlyphs(400, 600);
+	    tfont.loadGlyphs();
+	    tfont.drawString(0,0, "hello", Color.white);
+		
+		
+		
 		/*
 		Iterator<Bullet> bulletIter = bullets.iterator();
 

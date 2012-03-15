@@ -68,6 +68,7 @@ public class AsteroidsServer extends BasicGame {
 		while (shipIter.hasNext()) {
 			Ship ship = shipIter.next();
 			ship.render(g);
+			
 		}
 		
 		Iterator<Bullet> bulletIter = bullets.values().iterator();
@@ -75,6 +76,8 @@ public class AsteroidsServer extends BasicGame {
 			Bullet bullet = bulletIter.next();
 			bullet.render(g);
 		}
+		
+
 		
 	}
 

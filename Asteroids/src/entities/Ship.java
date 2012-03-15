@@ -28,7 +28,7 @@ public class Ship extends Entity {
 	private float acceleration = 0.015f;
 	
 	public int playerId;
-	
+	public int playerScore = 0;
 	
 	private boolean dead = false;
 	private int deadTime = Constants.DEAD_TIME;
@@ -145,7 +145,15 @@ public class Ship extends Entity {
 	public int getPlayerId() {
 		return playerId;
 	}
-
+	
+	public int getPlayerScore(){
+		return playerScore;
+	}
+	
+	public void addPlayerScore(int i){
+		this.playerScore += i;
+	}
+	
 	@Override
 	public void handleCollision(Asteroid asteroidOther) {
 		if (!invulnerable) {
