@@ -64,10 +64,12 @@ public class Game extends BasicGame {
 	@Override
 	public void render(GameContainer container, Graphics g)
 			throws SlickException {
-		Iterator<Asteroid> asterIter = asteroids.values().iterator();
-		while (asterIter.hasNext()) {
-			Asteroid roid = asterIter.next();
-			roid.render(g);
+		
+		
+		Iterator<Bullet> bulletIter = bullets.values().iterator();
+		while (bulletIter.hasNext()) {
+			Bullet bullet = bulletIter.next();
+			bullet.render(g);
 		}
 		
 		Iterator<Ship> shipIter = ships.values().iterator();
@@ -76,11 +78,13 @@ public class Game extends BasicGame {
 			ship.render(g);
 		}
 		
-		Iterator<Bullet> bulletIter = bullets.values().iterator();
-		while (bulletIter.hasNext()) {
-			Bullet bullet = bulletIter.next();
-			bullet.render(g);
+		Iterator<Asteroid> asterIter = asteroids.values().iterator();
+		while (asterIter.hasNext()) {
+			Asteroid roid = asterIter.next();
+			roid.render(g);
 		}
+		
+		
 		
 		playerShip.render(g);
 		
@@ -144,9 +148,9 @@ public class Game extends BasicGame {
 			public void received (Connection connection, Object object) {
 
 				if (object instanceof ConnectionResponse) {
-				         ConnectionResponse response = (ConnectionResponse)object;
-				         System.out.println(response.getPlayerId());
-				         playerShip.playerId = response.getPlayerId();
+			         ConnectionResponse response = (ConnectionResponse)object;
+			         System.out.println(response.getPlayerId());
+			         playerShip.playerId = response.getPlayerId();
 				}
 				else if (object instanceof AsteroidResponse) {
 					AsteroidResponse response = (AsteroidResponse)object;
