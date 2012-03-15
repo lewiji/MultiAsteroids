@@ -1,26 +1,17 @@
 package entities;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Random;
 
-import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
-import org.newdawn.slick.geom.Polygon;
-import org.newdawn.slick.geom.Shape;
-import org.newdawn.slick.geom.Transform;
 import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.loading.LoadingList;
-import org.newdawn.slick.particles.ConfigurableEmitter;
-import org.newdawn.slick.particles.ParticleIO;
-import org.newdawn.slick.particles.ParticleSystem;
 
 import core.Constants;
 
 public class Ship extends Entity {
-	private Polygon ship = null;
+	private Image ship;
 	private Vector2f thrust = new Vector2f();
 	public float rotation = 0.0f;
 	
@@ -39,28 +30,14 @@ public class Ship extends Entity {
 		position.x = 0;
 		position.y = 0;
 		
-		ship = new Polygon();
-		ship.addPoint(0.0f, 0.0f);
-		ship.addPoint(20.0f, 0.0f);
-		ship.addPoint(10.0f, 20.0f);
-		ship.setCenterX(position.x);
-		ship.setCenterY(position.y);
-		
-		resetShip();
-		
-		radius = ship.getBoundingCircleRadius();
-		
-        
-		
+		resetShip();		
 	}
 	
 	private void pointAtMouse(float mouseX, float mouseY) {
 		
 		float newShipAngle = (float) (Math.atan2( mouseY - position.y, mouseX - position.x));
-		newShipAngle += Math.toRadians(-90);
-		ship = (Polygon) ship.transform(Transform.createRotateTransform(newShipAngle - rotation, 
-																		position.x, position.y));
-		rotation = newShipAngle;
+		newShipAngle += Math.toRadians(90);
+		rotation = (float) newShipAngle;
 	}
 	
 	public void update(float mouseX, float mouseY, int delta) {
@@ -69,8 +46,8 @@ public class Ship extends Entity {
 	}
 	
 	public void thrust() {
-		thrust.x += Math.sin(rotation) * acceleration;
-		thrust.y += -Math.cos(rotation) * acceleration;
+		thrust.x -= Math.sin(rotation) * acceleration;
+		thrust.y -= -Math.cos(rotation) * acceleration;
 		
 		if (thrust.x > maxThrust) {
 			thrust.x = maxThrust;
@@ -99,10 +76,11 @@ public class Ship extends Entity {
 
 	@Override
 	public void update(int delta) {
+		if (ship == null) {
+			loadImage();
+		}
 		position.x = position.x - (thrust.x * delta);
 		position.y = position.y - (thrust.y * delta);
-		
-
 		
 		if (dead && deadTime > 0) {
 			position.x = -100;
@@ -133,7 +111,7 @@ public class Ship extends Entity {
 	}
 
 	@Override
-	public Shape getDrawable() {
+	public Image getImage() {
 		return ship;
 	}
 
@@ -184,14 +162,32 @@ public class Ship extends Entity {
 	
 	@Override
 	public void render(Graphics g) {
-		ship.setCenterX(position.x);
-		ship.setCenterY(position.y);
-		if (invulnerable) {
-			g.setColor(Color.green);
-			g.draw(ship);
-			g.setColor(Color.white);
-		} else {
-			g.draw(ship);
+		if (ship == null) {
+			loadImage();
 		}
+		ship.setRotation((float) Math.toDegrees(rotation));
+		if (invulnerable) {
+			ship.draw(position.x, position.y);
+		} else {
+			ship.draw(position.x, position.y);
+		}
+	}
+
+	@Override
+	public void loadImage() {
+		try {
+			ship = new Image("resources/img/ship.png");
+		} catch (SlickException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}  
+		try {
+			ship.setFilter(ship.FILTER_NEAREST);
+		} catch (SlickException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		radius = ship.getWidth();
 	}
 }

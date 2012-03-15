@@ -1,13 +1,7 @@
 package entities;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map.Entry;
-
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.geom.Shape;
+import org.newdawn.slick.Image;
 import org.newdawn.slick.geom.Vector2f;
 
 public abstract class Entity {
@@ -17,7 +11,9 @@ public abstract class Entity {
 	
 	public abstract void update(int delta);
 	
-	public abstract Shape getDrawable();
+	public abstract Image getImage();
+	
+	public abstract void loadImage();
 	
 	public Vector2f getPosition() {
 		return position;

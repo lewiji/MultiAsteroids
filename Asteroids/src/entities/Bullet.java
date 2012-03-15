@@ -1,31 +1,32 @@
 package entities;
 
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.geom.Circle;
-import org.newdawn.slick.geom.Shape;
+import org.newdawn.slick.Image;
+import org.newdawn.slick.SlickException;
+import org.newdawn.slick.loading.LoadingList;
 
 import core.Constants;
 
 public class Bullet extends Entity {
 	private float velocity = 0.5f;
 	private float rotation = 0.0f;
-	private Shape shape;
+	private Image sprite;
 	private int playerId;
 	
 	public Bullet(float rot, float x, float y, int aPlayerId) {
 		rotation = rot;
 		position.x = x;
 		position.y = y;
-		shape = new Circle(position.x, position.y, 3.0f);
-		radius = shape.getBoundingCircleRadius();
+		
 		playerId = aPlayerId;
 	}
 	
 	public void update(int delta) {
+		if (sprite == null) {
+			loadImage();
+		}
 		position.x = (float) (position.x - Math.sin(rotation) * velocity * delta);
 		position.y = (float) (position.y - -Math.cos(rotation) * velocity * delta);
-		shape.setCenterX(position.x);
-		shape.setCenterY(position.y);
 		
 		if (position.x > Constants.CONTAINER_WIDTH ||
 			position.x < 0 ||
@@ -36,8 +37,8 @@ public class Bullet extends Entity {
 	}
 
 	@Override
-	public Shape getDrawable() {
-		return shape;
+	public Image getImage() {
+		return sprite;
 	}
 
 	@Override
@@ -70,7 +71,27 @@ public class Bullet extends Entity {
 	
 	@Override
 	public void render(Graphics g) {
-		g.draw(shape);
+		if (sprite == null) {
+			loadImage();
+		}
+		sprite.draw(position.x, position.y);
 		
+	}
+
+	@Override
+	public void loadImage() {
+		try {
+			sprite = new Image("resources/img/bullet.png");
+		} catch (SlickException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			sprite.setFilter(sprite.FILTER_NEAREST);
+		} catch (SlickException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		radius = sprite.getWidth();
 	}
 }

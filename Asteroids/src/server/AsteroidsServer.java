@@ -110,23 +110,32 @@ public class AsteroidsServer extends BasicGame {
 			         connection.sendTCP(response);
 			      }
 			      else if (object instanceof AsteroidRequest) {
-			    	  AsteroidResponse response = new AsteroidResponse();
 			    	  
 			    	  Iterator<Asteroid> roidIter = asteroids.values().iterator();
 			    	  while (roidIter.hasNext()) {
+			    		  
 			    		  Asteroid roid = roidIter.next();
-			    		  AsteroidPOJO pojo = new AsteroidPOJO();
+			    		  if (roid.toBeDestroyed) {
+				    		  AsteroidDestroyResponse response = new AsteroidDestroyResponse();
+				    		  response.id = roid.id;
+				    		  roidIter.remove();
+				    		  connection.sendTCP(response);
+			    		  } else {
+					    	  AsteroidResponse response = new AsteroidResponse();
+				    		  AsteroidPOJO pojo = new AsteroidPOJO();
+				    		  
+				    		  pojo.x = roid.getPosition().x;
+				    		  pojo.y = roid.getPosition().y;
+				    		  pojo.size = roid.size;
+				    		  pojo.rot = roid.rotation;
+				    		  pojo.id = roid.id;
+
+				    		  response.asteroids.add(pojo);
+				    		  connection.sendTCP(response);
+			    		  }
 			    		  
-			    		  pojo.x = roid.getPosition().x;
-			    		  pojo.y = roid.getPosition().y;
-			    		  pojo.size = roid.size;
-			    		  pojo.rot = roid.rotation;
-			    		  pojo.id = roid.id;
-			    		  
-			    		 response.asteroids.add(pojo);
 			    	  }
 
-		    		  connection.sendTCP(response);
 			      }
 			      else if (object instanceof ShipRequest) {
 			    	  ShipRequest request = (ShipRequest)object;
@@ -247,7 +256,7 @@ public class AsteroidsServer extends BasicGame {
 						asteroids.put(newRoid.id, newRoid);
 					}
 				} else if (roid.size == Constants.ASTEROID_SIZE_SMALLER) {
-					for (int i = 0; i < 6; i++) {
+					for (int i = 0; i < 4; i++) {
 						Asteroid newRoid = new Asteroid(asteroids.size(), Constants.ASTEROID_SIZE_SMALLEST, roid.position.x + roid.radius/2, roid.position.y + roid.radius/2);
 						while (asteroids.get(newRoid.id) != null) {
 							newRoid.id += 1;
@@ -255,8 +264,6 @@ public class AsteroidsServer extends BasicGame {
 						asteroids.put(newRoid.id, newRoid);
 					}
 				}
-				// Destroy original asteroid
-				roidIter.remove();
 			}
 		}		
 	}

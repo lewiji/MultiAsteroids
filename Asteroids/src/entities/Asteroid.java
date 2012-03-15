@@ -3,9 +3,9 @@ package entities;
 import java.util.Random;
 
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.geom.Polygon;
-import org.newdawn.slick.geom.Shape;
-import org.newdawn.slick.geom.Transform;
+import org.newdawn.slick.Image;
+import org.newdawn.slick.SlickException;
+import org.newdawn.slick.loading.LoadingList;
 
 import core.Constants;
 
@@ -13,7 +13,7 @@ public class Asteroid extends Entity {
 	private float velocity = 0.01f;
 	public float rotation = 0.0f;
 	private float rotationVelocity = 0.01f;
-	private Polygon shape;
+	private Image sprite;
 	public float size;
 	
 	public Asteroid() {
@@ -21,22 +21,11 @@ public class Asteroid extends Entity {
 	}
 	
 	public Asteroid(float aSize, float x, float y, float rot, float rotVelocity) {
-		shape = new Polygon();
+		
 		size = aSize;
 		position.x = x;
 		position.y = y;
 		
-		shape.addPoint(0.0f * aSize, 0.0f  * aSize);
-		shape.addPoint(60.0f * aSize, 20.0f * aSize);
-		shape.addPoint(80.0f * aSize, 40.0f * aSize);
-		shape.addPoint(70.0f * aSize, 50.0f * aSize);
-		shape.addPoint(40.0f * aSize, 38.0f * aSize);
-		shape.addPoint(20.0f * aSize, 20.0f * aSize);
-		shape.addPoint(0.0f * aSize, 15.0f * aSize);
-		shape.setCenterX(position.x);
-		shape.setCenterY(position.y);
-		
-		radius = shape.getBoundingCircleRadius();
 		
 		if (aSize == Constants.ASTEROID_SIZE_SMALLER) {
 			velocity *= 2;
@@ -48,9 +37,6 @@ public class Asteroid extends Entity {
 		
 		rotation = rot;
 		rotationVelocity = rotVelocity;
-		
-		
-		shape = (Polygon) shape.transform(Transform.createRotateTransform(rotation));
 	}
 	
 	public Asteroid (int id, float aSize, float x, float y) {
@@ -70,6 +56,9 @@ public class Asteroid extends Entity {
 
 	@Override
 	public void update(int delta) {
+		if (sprite == null) {
+			loadImage();
+		}
 		position.x = (float) (position.x - Math.sin(rotation) * velocity * delta);
 		position.y = (float) (position.y - -Math.cos(rotation) * velocity * delta);
 		
@@ -89,14 +78,12 @@ public class Asteroid extends Entity {
 			position.y = Constants.CONTAINER_HEIGHT + radius;
 		}
 		
-		shape.setCenterX(position.x);
-		shape.setCenterY(position.y);
-		shape = (Polygon) shape.transform(Transform.createRotateTransform(rotationVelocity, position.x, position.y));
+		sprite.rotate(rotationVelocity);
 	}
 
 	@Override
-	public Shape getDrawable() {
-		return shape;
+	public Image getImage() {
+		return sprite;
 	}
 
 	@Override
@@ -128,7 +115,36 @@ public class Asteroid extends Entity {
 
 	@Override
 	public void render(Graphics g) {
-		g.draw(shape);
+		if (sprite == null) {
+			loadImage();
+		}
+		sprite.draw(position.x, position.y);
+	}
+
+	@Override
+	public void loadImage() {
+		try {
+			if (size == Constants.ASTEROID_SIZE_BIGGEST) {
+				sprite = new Image("resources/img/asteroid.png");
+			} else if (size == Constants.ASTEROID_SIZE_SMALLER) {
+				sprite = new Image("resources/img/asteroid_smaller.png");
+			} else {
+				sprite = new Image("resources/img/asteroid_smallest.png");
+			}
+		} catch (SlickException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		try {
+			sprite.setFilter(sprite.FILTER_NEAREST);
+		} catch (SlickException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		radius = sprite.getHeight();
+		sprite.setRotation(rotation);
 	}
 
 }

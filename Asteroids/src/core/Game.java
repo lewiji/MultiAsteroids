@@ -137,10 +137,13 @@ public class Game extends BasicGame {
 				}
 				else if (object instanceof AsteroidResponse) {
 					AsteroidResponse response = (AsteroidResponse)object;
-					asteroids.clear();
 					Iterator<AsteroidPOJO> iter = response.asteroids.iterator();
 					while (iter.hasNext()) {
 						AsteroidPOJO pojo = iter.next();
+						Asteroid asteroid = asteroids.get(pojo.id);
+						if (asteroid != null) {
+							asteroids.remove(asteroid);
+						}
 						asteroids.put(pojo.id, new Asteroid(pojo.id, pojo.size, pojo.x, pojo.y));
 					}
 				}
@@ -152,7 +155,7 @@ public class Game extends BasicGame {
 					ShipResponse response = (ShipResponse)object;
 					Ship ship = Game.ships.get(response.playerId);
 					if (ship != null) {
-						asteroids.remove(ship);
+						ships.remove(ship);
 					}
 					Ship newShip = new Ship();
 					newShip.position.x = response.x;
@@ -204,7 +207,7 @@ public class Game extends BasicGame {
 		
 		if (input.isMousePressed(Input.MOUSE_RIGHT_BUTTON)) {
 			BulletUpdate request = new BulletUpdate();
-			request.angle = playerShip.getAngle();
+			request.angle = (float) (playerShip.getAngle() + Math.toRadians(180));
 			request.x = playerShip.getPosition().x;
 			request.y = playerShip.getPosition().y;
 			request.playerId = playerShip.playerId;
