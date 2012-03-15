@@ -3,20 +3,18 @@
  */
 package core;
 
-import java.awt.Font;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.swing.JOptionPane;
+
 import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.BasicGame;
-import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
-import org.newdawn.slick.UnicodeFont;
-import org.newdawn.slick.font.effects.ColorEffect;
 
 import server.AsteroidDestroyResponse;
 import server.AsteroidPOJO;
@@ -111,10 +109,17 @@ public class Game extends BasicGame {
 	private void connectToServer() {
 		client = new Client(16384, 4096);
 		client.start();
-		try {
-			client.connect(5000, "localhost", 2112, 2113);
-		} catch (IOException e) {
-			e.printStackTrace();
+		while (!client.isConnected()) {
+			String address = JOptionPane.showInputDialog(null,
+					  "Enter an IP Address:",
+					  "Connection",
+					  JOptionPane.QUESTION_MESSAGE);
+			
+			try {
+				client.connect(5000, address, 2112, 2113);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		Kryo kryo = client.getKryo();
 		KryoRegistration.register(kryo);
