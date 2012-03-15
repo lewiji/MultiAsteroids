@@ -82,13 +82,13 @@ public class Game extends BasicGame {
 		
 		playerShip.render(g);
 		
-		Font font = new Font("Verdana", Font.PLAIN, 40);
+		/*Font font = new Font("Verdana", Font.PLAIN, 40);
 		UnicodeFont tfont = new UnicodeFont(font , 20, false, false);
 		tfont.getEffects().add(new ColorEffect(java.awt.Color.WHITE));
 	    tfont.addAsciiGlyphs();
 	    tfont.addGlyphs(400, 600);
 	    tfont.loadGlyphs();
-	    tfont.drawString(0,0, "hello", Color.white);
+	    tfont.drawString(0,0, "hello", Color.white);*/
 		
 		
 		
@@ -109,7 +109,7 @@ public class Game extends BasicGame {
 	}
 
 	private void connectToServer() {
-		client = new Client();
+		client = new Client(16384, 4096);
 		client.start();
 		try {
 			client.connect(5000, "localhost", 2112, 2113);

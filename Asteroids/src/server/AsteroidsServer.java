@@ -49,7 +49,7 @@ public class AsteroidsServer extends BasicGame {
 
 	}
 
-	public Server server = new Server();
+	public Server server = new Server(32768, 4096);
 	
 	EntityCollisions collisions = new EntityCollisions(Constants.CONTAINER_WIDTH, 
 			   Constants.CONTAINER_HEIGHT, 
