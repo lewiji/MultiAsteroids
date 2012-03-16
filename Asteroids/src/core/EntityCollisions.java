@@ -14,6 +14,8 @@ public class EntityCollisions {
 	 * The window is split into cells, say, 8x6. Each cell is a 'bucket' of entities.
 	 * When detecting collisions, each entity is put into one or more 'buckets' that it overlaps.
 	 * Collisions are then only checked against entities that are in the same buckets.
+	 * This is an implementation of a tutorial found at:
+	 * http://conkerjo.wordpress.com/2009/06/13/spatial-hashing-implementation-for-fast-2d-collisions/
 	 */
 	int width;
 	int height;
